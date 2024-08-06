@@ -3,18 +3,21 @@ module Serializer #(parameter DATA_WIDTH=8)
   (input i_Clk,
    input i_Clk_Fast,
    input [DATA_WIDTH-1:0] i_Data, 
-   input signed [1:0] i_RD,
-   output [DATA_WIDTH-1:0] o_Ser_Data);
-  
-  reg signed [1:0] r_RD = i_RD;
-  reg [3:0] r_4B;
-  reg [5:0] r_6B;
-  reg [9:0] r_10B;
+   output o_Ser_Data,
+   output reg [9:0] o_10B);
+
+  reg signed [1:0] r_RD = 2'sb11; //RD = -1
+  reg [3:0] r_4B = 4'b000;
+  reg [5:0] r_6B = 6'b00000;
+  reg [9:0] r_10B = 10'b0000000000;
   
   reg r_Data_Ready = 1'b0;
-  reg [DATA_WIDTH-1:0] r_Counter;
-  reg r1_Data; //2 registers for speeding up data
-  reg r2_Data;
+  reg [DATA_WIDTH-1:0] r_Counter = 0;
+  reg r1_Data = 1'b0; //2 registers for speeding up data
+  reg r2_Data = 1'b0;
+  
+  //have some kind of first_byte <= i_Data[7:0]
+  //go every slow clock, allows more than just 8 bit input data
   
   always @(posedge i_Clk) begin //must be sequential since depends on previous value (RD)
     case (i_Data[4:0])
@@ -122,10 +125,8 @@ module Serializer #(parameter DATA_WIDTH=8)
       end
       default : r_6B <= 6'b000000;
     endcase
-
-  end
-  
-  always @(posedge i_Clk) begin // ##### 3b/4b ####
+    
+	 // ##### 3b/4b ####
     case (i_Data[7:5])
       3'b000 : begin
         if (r_RD == 2'sb11)
@@ -155,6 +156,7 @@ module Serializer #(parameter DATA_WIDTH=8)
         else if (r_RD == 2'sb01) 
           r_4B <= 4'b0001;
       end
+      default : r_4B <= 4'b0000;
     endcase
   end
   
@@ -167,42 +169,32 @@ module Serializer #(parameter DATA_WIDTH=8)
       r_RD = 2'sb11; //RD = -1
     else
       r_RD = 2'sb01; //RD = 1 
-    r_Data_Ready = 1'b1;
+    r_Data_Ready = 1;
   end
   
-  //NOT WORKING RIGHT NOW (shift register??)
+
+
   //need to send 1 bit of r_10B every clock cycle to output
-  //also need to figure out how to capture this in TB
   //here i need to be combining it with the clock, sending 1 bit per clock cycle
   always @(posedge i_Clk_Fast) begin
     if (r_Data_Ready) begin
-      if (r_Counter == DATA_WIDTH) begin
+      if (r_Counter == 11) begin //10 bits now + 2 cycles to make it through shift register
         r_Counter <= 0;
+        r_Data_Ready <= 0;
+      end
+      else if (r_Counter <= 9) begin //so we dont access beyond array length
+        r_Counter <= r_Counter + 1;
+        r1_Data <= r_10B[r_Counter]; //slow data in
+        r2_Data <= r1_Data;
       end
       else begin
-        r_Count <= r_Counter + 1;
-        r1_Data <= r_10B[r_Count]; //slow data in
+        r_Counter <= r_Counter + 1;
         r2_Data <= r1_Data;
       end
     end
   end
   
-  //bad way to do it (doesnt work, need to only go when data is ready
-  always @(posedge i_Clk_Fast) begin
-    if (r_Counter == DATA_WIDTH) begin   
-      r_Counter <= 0;    
-    end
-    else begin
-      r_Count <= r_Counter + 1;
-    end
-  end
-  
-  always @(r_Count) begin
-    r1_Data <= r_10B[r_Count]; //slow data in
-    r2_Data <= r1_Data;
-  end
-  //######################
-  
+  assign o_10B = r_10B;
   assign o_Ser_Data = r2_Data; 
   
 endmodule
@@ -229,3 +221,4 @@ module Deserializer #(parameter DEPTH=8, DATA_WIDTH=8)
   
   
 endmodule
+
