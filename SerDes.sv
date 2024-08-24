@@ -1,7 +1,48 @@
-// Code your design here
+module SerDes #(parameter DATA_WIDTH=8)
+  (input i_Clk, i_S_en,
+   input i_Clk_Fast,
+   input [DATA_WIDTH-1:0] i_Data,
+   output o_Ser_Data,
+   output reg [9:0] o_10B,
+   
+   input i_Wrst_n, i_W_en,
+   input i_Rrst_n, i_R_en,
+   input i_Data_In,
+   output reg [7:0] o_Data,
+   output reg o_FIFO_Out,
+   output reg o_full, o_empty
+  );
+  
+  Serializer Ser (
+    .i_Clk(i_Clk),
+    .i_S_en(i_S_en),
+    .i_Clk_Fast(i_Clk_Fast),
+    .i_Data(i_Data),
+    .o_Ser_Data(o_Ser_Data),
+    .o_10B(o_10B)
+  	);
+  
+  Deserializer Des (
+    .i_Wclk(i_Clk_Fast),    
+    .i_Wrst_n(i_Wrst_n), 
+    .i_W_en(i_W_en), 
+    .i_Rclk(i_Clk), 
+    .i_Rrst_n(i_Rrst_n), 
+    .i_R_en(i_R_en), 
+    .i_Data_In(i_Data_In), 
+    .o_Data(o_Data),
+    .o_FIFO_Out(o_FIFO_Out),
+    .o_full(o_full), 
+    .o_empty(o_empty)
+  	);
+  
+endmodule
+
+
 module Serializer #(parameter DATA_WIDTH=8)
   (input i_Clk,
    input i_Clk_Fast,
+   input i_S_en,
    input [DATA_WIDTH-1:0] i_Data, 
    output o_Ser_Data,
    output reg [9:0] o_10B);
@@ -15,9 +56,6 @@ module Serializer #(parameter DATA_WIDTH=8)
   reg [DATA_WIDTH-1:0] r_Counter = 0;
   reg r1_Data = 1'b0; //2 registers for speeding up data
   reg r2_Data = 1'b0;
-  
-  //have some kind of first_byte <= i_Data[7:0]
-  //go every slow clock, allows more than just 8 bit input data
   
   always @(posedge i_Clk) begin //must be sequential since depends on previous value (RD)
     case (i_Data[4:0])
@@ -126,7 +164,6 @@ module Serializer #(parameter DATA_WIDTH=8)
       default : r_6B <= 6'b000000;
     endcase
     
-	 // ##### 3b/4b ####
     case (i_Data[7:5])
       3'b000 : begin
         if (r_RD == 2'sb11)
@@ -172,8 +209,8 @@ module Serializer #(parameter DATA_WIDTH=8)
     r_Data_Ready = 1;
   end
   
-
-
+  
+  
   //need to send 1 bit of r_10B every clock cycle to output
   //here i need to be combining it with the clock, sending 1 bit per clock cycle
   always @(posedge i_Clk_Fast) begin
@@ -198,11 +235,13 @@ module Serializer #(parameter DATA_WIDTH=8)
   assign o_Ser_Data = r2_Data; 
 endmodule
 
+
+
 module Deserializer #(parameter DEPTH=8, DATA_WIDTH=10)
   (input i_Wclk, i_Wrst_n, i_W_en,
    input i_Rclk, i_Rrst_n, i_R_en,
    input i_Data_In,
-   output reg [7:0] o_Data_Out,
+   output reg [7:0] o_Data,
    output reg o_FIFO_Out,
    output reg o_full, o_empty);
  
@@ -239,6 +278,7 @@ module Deserializer #(parameter DEPTH=8, DATA_WIDTH=10)
   
   always @(posedge i_Rclk) begin
     if (r_Counter == 10) begin 
+      r_Counter = 0;
       case (r_Des_Data[9:4])
         6'b100111 : r_5B <= 5'b00000;
         6'b011000 : r_5B <= 5'b00000;
@@ -311,6 +351,9 @@ module Deserializer #(parameter DEPTH=8, DATA_WIDTH=10)
     r_8B = {r_3B, r_5B}; //r_8B fully created
   end
   
+  assign o_Data = r_8B;
+  
+endmodule
   assign o_Data_Out = r_8B;
   
 endmodule
