@@ -202,14 +202,12 @@ module Serializer #(parameter DATA_WIDTH=8)
   always @(r_6B, r_4B) begin 
   	r_10B = {r_6B, r_4B}; //r_10B fully created
     //calculate running disparity here
-    if (r_10B[0] + r_10B[1] + r_10B[2] + r_10B[3] + r_10B[4] + r_10B[5] + r_10B[6] + r_10B[7] + r_10B[8] + r_10B[9] > 5)
-      r_RD = 2'sb11; //RD = -1
-    else
-      r_RD = 2'sb01; //RD = 1 
+    if (r_10B[0]+r_10B[1]+r_10B[2]+r_10B[3]+r_10B[4]+r_10B[5]+r_10B[6]+r_10B[7]+r_10B[8]+r_10B[9] > 5)
+      r_RD = 2'sb01; //RD = +1 (more 1s then +1 RD)
+    else if (r_10B[0]+r_10B[1]+r_10B[2]+r_10B[3]+r_10B[4]+r_10B[5]+r_10B[6]+r_10B[7]+r_10B[8]+r_10B[9] < 5)
+      r_RD = 2'sb11; //RD = -1 (more 0s then -1 RD)
     r_Data_Ready = 1;
   end
-  
-  
   
   //need to send 1 bit of r_10B every clock cycle to output
   //here i need to be combining it with the clock, sending 1 bit per clock cycle
