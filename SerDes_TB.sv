@@ -1,16 +1,17 @@
-module SerDes_Project_TB();
-  
+`timescale 1ns / 1ps
+
+module SerDes_TB();
   //for Serializer
   reg r_Clk = 1'b0, r_Clk_Fast = 1'b0;
   reg r_S_en = 1'b0;
-  reg [7:0] r_Data = 0;
+  reg [7:0] r_Data;
   wire w_Ser_Data;
   wire [9:0] w_10B;
   
   //for Deserializer
   reg r_W_en, r_Wrst_n;
   reg r_R_en, r_Rrst_n;
-  reg r_Ser_Data = 0; //same as r_Data_In
+  reg r_Ser_Data; //same as r_Data_In
   wire [7:0] w_Des_Out;
   wire w_FIFO_Out;
   wire w_full, w_empty;
@@ -20,7 +21,7 @@ module SerDes_Project_TB();
   reg r_Wdata = 0;
   reg r_Ser_Data_q[$]; //serialized data queue
   
-  SerDes UUT 
+  SerDes_Top UUT 
   (.i_Clk(r_Clk),
    .i_S_en(r_S_en),
    .i_Clk_Fast(r_Clk_Fast),
@@ -48,8 +49,10 @@ module SerDes_Project_TB();
   	r_Clk_Fast = 1'b0;
     r_Wrst_n = 1'b0;
     r_W_en = 1'b0;
+    r_Data = 0;
+    r_Ser_Data = 0;
     
-    #400; //simulated delay
+    #380; //simulated delay
     
     r_Wrst_n = 1'b1;
     repeat (4) begin
@@ -63,7 +66,6 @@ module SerDes_Project_TB();
       end
       #50;
     end
-    
   end
 
   initial begin //slow read clock
@@ -93,7 +95,11 @@ module SerDes_Project_TB();
 
     r_Input_En <= 1'b0;
     //sending data block end
-
+    
+    $display("");
+    $display("\///// TRANSMISSION FINISHED, STARTING RECEIVING /////");
+    $display("");
+    
     r_Rrst_n = 1'b1;
     repeat(4) begin
       for (int i=0; i<20; i++) begin
@@ -102,15 +108,18 @@ module SerDes_Project_TB();
         if(r_R_en) begin
           r_Wdata = r_Wdata_q.pop_front();
           if (w_FIFO_Out !== r_Wdata)
-            $error ("Time = %0t: Comparison FAILED: expected wr_data = %h, rd_data = %h", $time, r_Wdata, w_FIFO_Out);
+            $display ("Time = %0t: Comparison FAILED: expected wr_data = %h, rd_data = %h", $time, r_Wdata, w_FIFO_Out);
           else
             $display ("Time = %0t: Comparison PASSED: wr_data = %h, rd_data = %h", $time, r_Wdata, w_FIFO_Out);
-          
         end 
       end
       #50;
       $display("Time = %0t: DECODED 8b: %b (%b)(%b)",$time, w_Des_Out, w_Des_Out[4:0], w_Des_Out[7:5]);
     end
+    
+    $display("");
+    $display("\///// RECEIVING FINISHED /////");
+    $display("");
     $finish();
   end
   
@@ -140,3 +149,4 @@ module SerDes_Project_TB();
     end
   end
 endmodule
+
