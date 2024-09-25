@@ -4,8 +4,8 @@
 class ser_base_test extends uvm_test;
     `uvm_component_utils(ser_base_test)
     
-    dut_env env;
-    uvm_table_printer printer;
+    ser_env env;
+    ser_basic_sequence seq;
     
     function new(string name = "ser_base_test" , uvm_component parent);
         super.new(name, parent);
@@ -13,17 +13,14 @@ class ser_base_test extends uvm_test;
     
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
-        env = dut_env::type_id::create("env", this);
-        printer = new();
-        printer.knobs.depth = 5;
+        env = ser_env::type_id::create("env", this);
+        seq = ser_basic_sequence::type_id::create("seq");
      endfunction: build_phase
      
-     virtual function void end_of_elaboration_phase(uvm_phase phase);
-        `uvm_info(get_type_name(), $sformatf("Printing the test topology : \n%s", this.sprint(printer)), UVM_DEBUG)
-     endfunction: end_of_elaboration_phase
-     
      virtual task run_phase(uvm_phase phase);
-        phase.phase_done.set_drain_time(this, 1500);
+        phase.raise_objection(this);
+        seq.start(env.agent.sequencer);
+        phase.drop_objection(this);
     endtask: run_phase
 endclass: ser_base_test
 

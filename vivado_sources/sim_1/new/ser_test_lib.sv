@@ -10,7 +10,6 @@ package ser_test_lib;
 
  // including ser test list
  `include "ser_base_test.sv"    
- `include "ser_random_test.sv"    
 
 endpackage
 

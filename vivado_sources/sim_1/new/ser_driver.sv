@@ -2,9 +2,12 @@
 `define SER_DRIVER
 
 class ser_driver extends uvm_driver #(ser_transaction);
+    ser_transaction trans;
     virtual interface serializer_if vif;
     
     `uvm_component_utils(ser_driver)
+    
+    uvm_analysis_port#(ser_transaction) drv2rm_port;
     
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -12,49 +15,43 @@ class ser_driver extends uvm_driver #(ser_transaction);
     
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
-        
-        if(!uvm_config_db#(virtual serializer_if)::get(this, "", "in_intf", vif))
+        if(!uvm_config_db#(virtual serializer_if)::get(this, "", "intf", vif))
             `uvm_fatal("NOVIF", {"Virtual Interface must be set for: ", get_full_name(), ".vif"})
-            `uvm_info(get_full_name(), "Build Stage Complete", UVM_LOW)
+        drv2rm_port = new("drv2rm_port", this);
+        `uvm_info(get_full_name(), "Build Stage Complete", UVM_LOW)
     endfunction: build_phase
     
     virtual task run_phase(uvm_phase phase);
-        fork //runs tasks in parallel
-            reset();
-            get_and_drive();
-        join
+        reset();
+        forever begin
+            seq_item_port.get_next_item(req);
+            drive();
+            `uvm_info(get_full_name(), $sformatf("TRANSACTION FROM DRIVER"), UVM_LOW);
+            req.print();
+            //@(vif.dr_cb);
+            $cast(rsp, req.clone()); //making clone of transaction to send to reference model
+            rsp.set_id_info(req);
+            drv2rm_port.write(rsp);
+            seq_item_port.item_done();
+            seq_item_port.put(rsp);
+        end
     endtask: run_phase
     
     virtual task reset();
-        forever begin
-            @(negedge vif.rst_n);
-            `uvm_info(get_type_name(), "Resetting Signals", UVM_LOW)
-            vif.ser_enable = 0;
-            vif.in_data = 0;
-            vif.out_data = 0;
-            vif.out_10b = 0;
-        end
+        `uvm_info(get_type_name(), "Resetting Signals", UVM_LOW)
+         vif.ser_enable <= 0;
+         vif.in_data <= 0;
+         vif.out_data <= 0;
+         vif.out_10b <= 0;
     endtask: reset
     
-    virtual task get_and_drive();
-        forever begin
-            while(vif.rst_n != 1'b0) begin
-                seq_item_port.get_next_item(req);
-                drive_packet(req);
-                seq_item_port.item_done();
-             end
-         end
-    endtask: get_and_drive
-    
-    //this is my drive packet that needs to run serializer
-    virtual task drive_packet(ser_transaction pkt); 
-        vif.ser_enable = 1'b0;
-        repeat(pkt.delay) @(posedge vif.clk);
-        vif.ser_enable = pkt.ser_enable;
-        vif.in_data = pkt.in_data;
-        @(posedge vif.clk);
-        vif.ser_enable = 1'b0;
-    endtask: drive_packet
+    virtual task drive();
+        wait(!vif.rst_n);
+        //@(vif.dr_cb);
+        vif.in_data <= req.in_data;
+        vif.out_data <= req.out_data;
+        vif.out_10b <= req.out_10b;
+    endtask: drive
      
 endclass: ser_driver
 

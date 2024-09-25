@@ -12,20 +12,16 @@ module Serializer_TB;
     bit clk_fast;
     bit rst_n;
     
-    serializer_if i_vif (.clk(clk),
-                         .clk_fast(clk_fast),
-                         .rst_n(rst_n));
-        
-    serializer_if o_vif (.clk(clk),
-                         .clk_fast(clk_fast),
-                         .rst_n(rst_n));
+    serializer_if ser_intf (.clk(clk),
+                            .clk_fast(clk_fast),
+                            .rst_n(rst_n));
                          
     serializer ser_top (.i_Clk(clk),
                         .i_Clk_Fast(clk_fast),
-                        .i_S_en(i_vif.ser_enable), //currently does nothing?
-                        .i_Data(i_vif.in_data),
-                        .o_Ser_Data(o_vif.out_data),
-                        .o_10B(o_vif.out_10b));
+                        .i_S_en(ser_intf.ser_enable), //currently does nothing? remove
+                        .i_Data(ser_intf.in_data),
+                        .o_Ser_Data(ser_intf.out_data),
+                        .o_10B(ser_intf.out_10b));
     
     always #50ns clk = ~clk; //20MHz read
     always #1ns clk_fast = ~clk_fast; //1000MHz write
@@ -34,12 +30,9 @@ module Serializer_TB;
         #5 rst_n = 1'b0;
         #25 rst_n = 1'b1;
     end
-    
-    assign o_vif.ser_enable = i_vif.ser_enable; //not sure what this does
-    
+
     initial begin
-        uvm_config_db#(virtual serializer_if)::set(uvm_root::get(), "*.agent.*", "in_intf", i_vif);
-        uvm_config_db#(virtual serializer_if)::set(uvm_root::get(), "*.monitor*", "out_intf", o_vif);
+        uvm_config_db#(virtual serializer_if)::set(uvm_root::get(), "*", "intf", ser_intf);
         run_test();
     end
     

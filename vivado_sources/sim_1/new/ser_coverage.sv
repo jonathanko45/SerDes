@@ -2,27 +2,28 @@
 `define SER_COVERAGE
 
 class ser_coverage extends uvm_subscriber #(ser_transaction);
-    ser_transaction pkt;
+    ser_transaction cov_trans;
     int count;
     
     `uvm_component_utils(ser_coverage)
     
     covergroup cg;
         option.per_instance = 1;
-        cov_ser_enable: coverpoint pkt.ser_enable;
-        cov_in_data:    coverpoint pkt.in_data;
-        cov_out_data:   coverpoint pkt.out_data;
-        cov_out_10b:    coverpoint pkt.out_10b;
-        cov_delay:      coverpoint pkt.delay;
+        option.goal = 100;
+
+        cov_in_data:    coverpoint cov_trans.in_data {bins in_values[] = {[0:$]};}
+        cov_out_data:   coverpoint cov_trans.out_data {bins out_values[] = {[0:$]};} //might not want every single out value
+        cov_out_10b:    coverpoint cov_trans.out_10b {bins out_10b_1 = {1}; bins out_10b_0  = {0};}
      endgroup: cg
      
      function new(string name, uvm_component parent);
         super.new(name, parent);
         cg = new();
+        cov_trans =new();
      endfunction: new
      
      function void write (ser_transaction t);
-        pkt = t;
+        this.cov_trans = t;
         count++;
         cg.sample();
      endfunction: write

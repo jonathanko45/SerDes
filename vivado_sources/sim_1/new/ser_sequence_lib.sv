@@ -10,8 +10,8 @@ package ser_sequence_lib;
     import ser_env_pkg::*;
     
     //including ser test list
-    `include "ser_random_sequence.sv"
-    `include "ser_multiple_random_sequence.sv"
+    `include "ser_basic_sequence.sv"
+
     
 endpackage
 
