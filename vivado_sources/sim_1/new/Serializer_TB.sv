@@ -18,7 +18,6 @@ module Serializer_TB;
                          
     serializer ser_top (.i_Clk(clk),
                         .i_Clk_Fast(clk_fast),
-                        .i_S_en(ser_intf.ser_enable), //currently does nothing? remove
                         .i_Data(ser_intf.in_data),
                         .o_Ser_Data(ser_intf.out_data),
                         .o_10B(ser_intf.out_10b));

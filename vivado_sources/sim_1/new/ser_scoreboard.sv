@@ -52,8 +52,8 @@ class ser_scoreboard extends uvm_scoreboard;
             exp_trans = exp_trans_fifo.pop_front();
             if(act_trans_fifo.size != 0) begin
                 act_trans = act_trans_fifo.pop_front();
-                `uvm_info(get_full_name(), $sformatf("expected 10b = %d, actual 10b = %d ", exp_trans.out_10b, act_trans.out_10b), UVM_LOW);
-                `uvm_info(get_full_name(), $sformatf("expected serial out = %d, actual serial out = %d ", exp_trans.out_data, act_trans.out_data), UVM_LOW);
+                `uvm_info(get_full_name(), $sformatf("expected 10b = %b, actual 10b = %b ", exp_trans.out_10b, act_trans.out_10b), UVM_LOW);
+                `uvm_info(get_full_name(), $sformatf("expected serial out = %b, actual serial out = %b ", exp_trans.out_data, act_trans.out_data), UVM_LOW);
                 
                 if (exp_trans.out_10b == act_trans.out_10b) begin
                     `uvm_info(get_full_name(), $sformatf("10b MATCHES"), UVM_LOW);

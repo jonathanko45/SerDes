@@ -7,7 +7,6 @@ class ser_monitor extends uvm_monitor;
     
     uvm_analysis_port #(ser_transaction) mon2sb_port;
     ser_transaction act_trans;
-    //ser_transaction data_clone;
     
     `uvm_component_utils(ser_monitor)
     
@@ -33,8 +32,8 @@ class ser_monitor extends uvm_monitor;
       
       virtual task collect_trans();
          wait(!vif.rst_n);
-         //repeat (12) @(vif.rc_cb);  
-        repeat(12) @(posedge vif.clk);
+         repeat (12) @(vif.rc_cb);  
+
         
             //maybe do this instead
             /*
@@ -49,9 +48,9 @@ class ser_monitor extends uvm_monitor;
             could be issue that out_data gets overwritten, maybe need to pass it off some way
             */
          
-         act_trans.in_data = vif.in_data;
-         act_trans.out_data = vif.out_data;
-         act_trans.out_10b = vif.out_10b;
+         act_trans.in_data = vif.rc_cb.in_data;
+         //act_trans.out_data = vif.rc_cb.out_data;
+         act_trans.out_10b = vif.rc_cb.out_10b;
          num_pkts++;
          `uvm_info(get_full_name(),$sformatf("TRANSACTION FROM MONITOR"), UVM_LOW);
          act_trans.print();

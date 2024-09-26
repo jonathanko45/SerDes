@@ -5,10 +5,30 @@ interface serializer_if #(parameter DATA_WIDTH=8)
      input clk_fast,
      input rst_n);
     
-    logic ser_enable;
     logic [DATA_WIDTH-1:0] in_data;
     logic out_data;
     logic [9:0] out_10b;
+    
+    //for driver
+    clocking dr_cb@(posedge clk);
+        output in_data;
+        input out_10b;
+    endclocking
+    modport DRV (clocking dr_cb, input clk, rst_n);
+    
+    //for monitor
+    clocking rc_cb@(negedge clk);
+        input in_data;
+        input out_10b;
+    endclocking
+    modport RCV (clocking rc_cb, input clk, rst_n);
+    
+    //montior fast output
+    clocking rc_cb_fast@(negedge clk_fast);
+        input out_data;
+    endclocking
+    modport RCV_fast (clocking rc_cb_fast, input clk_fast, rst_n);
+    
 endinterface: serializer_if
 
 module serializer #(parameter DATA_WIDTH=8)

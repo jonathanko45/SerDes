@@ -11,10 +11,10 @@ class ser_transaction extends uvm_sequence_item;
     constraint timing {delay inside {[0 : 5]}; }
     
     `uvm_object_utils_begin(ser_transaction)
-        `uvm_field_int(in_data,     UVM_DEFAULT)
-        `uvm_field_int(out_data,    UVM_DEFAULT)
-        `uvm_field_int(out_10b,     UVM_DEFAULT)
-        `uvm_field_int(delay,       UVM_DEFAULT)
+        `uvm_field_int(in_data, UVM_DEFAULT | UVM_BIN)
+        `uvm_field_int(out_data, UVM_DEFAULT | UVM_BIN)
+        `uvm_field_int(out_10b, UVM_DEFAULT | UVM_BIN)
+        `uvm_field_int(delay, UVM_DEFAULT)
     `uvm_object_utils_end
     
     function new(string name = "ser_transaction");
