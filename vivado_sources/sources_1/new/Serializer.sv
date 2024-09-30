@@ -3,25 +3,34 @@
 interface serializer_if #(parameter DATA_WIDTH=8)
     (input clk,
      input clk_fast,
-     input rst_n);
+     input reset);
     
     logic [DATA_WIDTH-1:0] in_data;
+    logic signed in_RD;
+    logic rst_n;
     logic out_data;
     logic [9:0] out_10b;
+    logic signed [1:0] out_RD;
     
     //for driver
     clocking dr_cb@(posedge clk);
         output in_data;
+        output in_RD;
+        output rst_n;
         input out_10b;
+        input out_RD;
     endclocking
-    modport DRV (clocking dr_cb, input clk, rst_n);
+    modport DRV (clocking dr_cb, input clk, reset);
     
     //for monitor
     clocking rc_cb@(negedge clk);
         input in_data;
+        input in_RD;
+        input rst_n;
         input out_10b;
+        input out_RD;
     endclocking
-    modport RCV (clocking rc_cb, input clk, rst_n);
+    modport RCV (clocking rc_cb, input clk, reset);
     
     //montior fast output
     clocking rc_cb_fast@(negedge clk_fast);
@@ -34,21 +43,22 @@ endinterface: serializer_if
 module serializer #(parameter DATA_WIDTH=8)
   (input i_Clk,
    input i_Clk_Fast,
-   input i_rst_n, //resets values to known
-   input i_S_en,  //TODO if high will turn on functionality
+   input i_rst_n,
    input [DATA_WIDTH-1:0] i_Data, 
+   input signed [1:0] i_RD,
    output o_Ser_Data,
-   output reg [9:0] o_10B);
+   output reg [9:0] o_10B,
+   output reg signed [1:0] o_RD);
 
-  reg signed [1:0] r_RD = 2'sb11; //RD = -1
-  reg [3:0] r_4B = 0;
-  reg [5:0] r_6B = 0;
-  reg [9:0] r_10B = 0;
+  reg signed [1:0] r_RD = i_RD; //RD = 2'sb11 =-1
+  reg [3:0] r_4B;
+  reg [5:0] r_6B;
+  reg [9:0] r_10B;
   
-  reg r_Data_Ready = 0;
-  reg [DATA_WIDTH-1:0] r_Counter = 0;
-  reg r1_Data = 0; //2 registers for speeding up data
-  reg r2_Data = 0;
+  reg [2:0] r_Data_Stage;
+  reg [DATA_WIDTH-1:0] r_Counter;
+  reg r1_Data; //2 registers for speeding up data
+  reg r2_Data;
   
   always @(posedge i_Clk) begin //must be sequential since depends on previous value (RD)
     if (!i_rst_n) begin
@@ -56,8 +66,9 @@ module serializer #(parameter DATA_WIDTH=8)
       r_6B <= 0;
       r_10B <= 0;
       r_RD <= 2'sb11; //RD = -1
-      r_Data_Ready <= 0;
+      r_Data_Stage <= 3'b000;
     end else begin 
+      if (r_Data_Stage == 3'b000) begin
         case (i_Data[4:0])
           5'b00000 : begin
             if (r_RD == 2'sb11)
@@ -163,7 +174,8 @@ module serializer #(parameter DATA_WIDTH=8)
           end
           default : r_6B <= 6'b000000;
         endcase
-        
+        r_Data_Stage <= 3'b001;
+      end else if (r_Data_Stage == 3'b001) begin
         case (i_Data[7:5])
           3'b000 : begin
             if (r_RD == 2'sb11)
@@ -195,19 +207,27 @@ module serializer #(parameter DATA_WIDTH=8)
           end
           default : r_4B <= 4'b0000;
         endcase
+        r_Data_Stage <= 3'b010;
+      end
     end
   end
   
-  //only activate when r_6B or r_4B update
   //should be combinational block
-  always @(r_6B, r_4B) begin 
-  	r_10B = {r_6B, r_4B}; //r_10B fully created
-    //calculate running disparity here
-    if (r_10B[0]+r_10B[1]+r_10B[2]+r_10B[3]+r_10B[4]+r_10B[5]+r_10B[6]+r_10B[7]+r_10B[8]+r_10B[9] > 5)
-      r_RD = 2'sb01; //RD = +1 (more 1s then +1 RD)
-    else if (r_10B[0]+r_10B[1]+r_10B[2]+r_10B[3]+r_10B[4]+r_10B[5]+r_10B[6]+r_10B[7]+r_10B[8]+r_10B[9] < 5)
-      r_RD = 2'sb11; //RD = -1 (more 0s then -1 RD)
-    r_Data_Ready = 1;
+  always @(r_Data_Stage) begin
+    if (r_Data_Stage == 3'b001) begin
+        if (r_6B[0]+r_6B[1]+r_6B[2]+r_6B[3]+r_6B[4]+r_6B[5] > 3)
+          r_RD = 2'sb01; //RD = +1 (more 1s then +1 RD)
+        else if (r_6B[0]+r_6B[1]+r_6B[2]+r_6B[3]+r_6B[4]+r_6B[5] < 3)
+          r_RD = 2'sb11; //RD = -1 (more 0s then -1 RD)
+    end else if (r_Data_Stage == 3'b010) begin
+        r_10B = {r_6B, r_4B}; //r_10B fully created
+        //calculate running disparity here
+        if (r_10B[0]+r_10B[1]+r_10B[2]+r_10B[3]+r_10B[4]+r_10B[5]+r_10B[6]+r_10B[7]+r_10B[8]+r_10B[9] > 5)
+          r_RD = 2'sb01; //RD = +1 (more 1s then +1 RD)
+        else if (r_10B[0]+r_10B[1]+r_10B[2]+r_10B[3]+r_10B[4]+r_10B[5]+r_10B[6]+r_10B[7]+r_10B[8]+r_10B[9] < 5)
+          r_RD = 2'sb11; //RD = -1 (more 0s then -1 RD)
+        r_Data_Stage = 3'b011;
+    end
   end
   
   //need to send 1 bit of r_10B every clock cycle to output
@@ -218,10 +238,10 @@ module serializer #(parameter DATA_WIDTH=8)
        r2_Data <= 0;
        r_Counter <= 0;
      end else begin
-        if (r_Data_Ready) begin
+        if (r_Data_Stage == 3'b011) begin
           if (r_Counter == 11) begin //10 bits now + 2 cycles to make it through shift register
-            r_Counter <= 0;
-            r_Data_Ready <= 0;
+            r_Counter <= 0; 
+            r_Data_Stage <= 3'b000;
           end
           else if (r_Counter <= 9) begin //so we dont access beyond array length
             r_Counter <= r_Counter + 1;
@@ -238,5 +258,7 @@ module serializer #(parameter DATA_WIDTH=8)
   
   assign o_10B = r_10B;
   assign o_Ser_Data = r2_Data; 
+  assign o_RD = r_RD;
+  
 endmodule
 

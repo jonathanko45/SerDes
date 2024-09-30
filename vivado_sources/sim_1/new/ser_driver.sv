@@ -28,7 +28,8 @@ class ser_driver extends uvm_driver #(ser_transaction);
             drive();
             `uvm_info(get_full_name(), $sformatf("TRANSACTION FROM DRIVER"), UVM_LOW);
             req.print();
-            repeat (12) @(vif.dr_cb);
+            repeat (2) @(vif.dr_cb);
+            @(vif.rc_cb); //one of each so monitor synchs with ref model
             $cast(rsp, req.clone()); //making clone of transaction to send to reference model
             rsp.set_id_info(req);
             drv2rm_port.write(rsp);
@@ -39,13 +40,18 @@ class ser_driver extends uvm_driver #(ser_transaction);
     
     virtual task reset();
          `uvm_info(get_type_name(), "Resetting Signals", UVM_LOW);
-         vif.dr_cb.in_data <= 0;
+         vif.dr_cb.in_data <= 8'b00000000;
+         vif.dr_cb.rst_n <= 0;
+         //vif.dr_cb.in_RD <= 2'sb11; maybe?
     endtask: reset
     
     virtual task drive();
-        wait(!vif.rst_n);
         @(vif.dr_cb);
+        wait(!vif.reset);
+        @(vif.dr_cb);
+        vif.dr_cb.rst_n <= 1'b1;
         vif.dr_cb.in_data <= req.in_data;
+        vif.dr_cb.in_RD <= req.in_RD;
     endtask: drive
      
 endclass: ser_driver

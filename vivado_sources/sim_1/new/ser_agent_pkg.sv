@@ -4,7 +4,9 @@
 package ser_agent_pkg;
     import uvm_pkg::*;
    `include "uvm_macros.svh"
-
+    
+   typedef uvm_object_string_pool #(uvm_queue#(int)) uvm_queue_pool;
+    
    // include Agent components : driver,monitor,sequencer
   `include "ser_transaction.sv"
   `include "ser_sequencer.sv"

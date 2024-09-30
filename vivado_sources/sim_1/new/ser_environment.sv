@@ -8,7 +8,7 @@ class ser_env extends uvm_env;
     ser_coverage coverage;
     
     `uvm_component_utils(ser_env)
-    
+
     function new(string name, uvm_component parent);
         super.new(name, parent);
     endfunction: new

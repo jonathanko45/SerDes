@@ -47,7 +47,7 @@ class ser_scoreboard extends uvm_scoreboard;
     endtask: run_phase
     
     virtual task compare_trans();
-        ser_transaction exp_trans, act_trans;//do i need this?
+        ser_transaction exp_trans, act_trans;
         if (exp_trans_fifo.size != 0) begin
             exp_trans = exp_trans_fifo.pop_front();
             if(act_trans_fifo.size != 0) begin
