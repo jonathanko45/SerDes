@@ -10,6 +10,9 @@ class ser_scoreboard extends uvm_scoreboard;
     ser_transaction exp_trans_fifo[$], act_trans_fifo[$];
     bit error;
     
+    uvm_queue#(int) mon_queue = uvm_queue_pool::get_global("queue_key_mon");
+    uvm_queue#(int) rm_queue = uvm_queue_pool::get_global("queue_key_rm");
+    int exp_ser, act_ser;
     `uvm_component_utils(ser_scoreboard)
     
     function new(string name, uvm_component parent);
@@ -53,7 +56,14 @@ class ser_scoreboard extends uvm_scoreboard;
             if(act_trans_fifo.size != 0) begin
                 act_trans = act_trans_fifo.pop_front();
                 `uvm_info(get_full_name(), $sformatf("expected 10b = %b, actual 10b = %b ", exp_trans.out_10b, act_trans.out_10b), UVM_LOW);
-                `uvm_info(get_full_name(), $sformatf("expected serial out = %b, actual serial out = %b ", exp_trans.out_data, act_trans.out_data), UVM_LOW);
+                
+                `uvm_info(get_full_name(), $sformatf("expected serial out | actual serial out"), UVM_LOW);
+                repeat (10) begin
+                    act_ser = mon_queue.pop_front();
+                    exp_ser = rm_queue.pop_front();
+                    if (act_ser != exp_ser) error = 1;
+                    `uvm_info(get_full_name(), $sformatf("                  %0b | %0b ", exp_ser, act_ser), UVM_LOW);
+                end
                 
                 if (exp_trans.out_10b == act_trans.out_10b) begin
                     `uvm_info(get_full_name(), $sformatf("10b MATCHES"), UVM_LOW);
@@ -62,12 +72,13 @@ class ser_scoreboard extends uvm_scoreboard;
                     error = 1;
                 end
                 
-                if (exp_trans.out_data == act_trans.out_data) begin
-                    `uvm_info(get_full_name(), $sformatf("SERIAL MATCHES"), UVM_LOW);
+                if (error != 1) begin
+                    `uvm_info(get_full_name(), $sformatf("SERIAL DATA MATCHES"), UVM_LOW);
                 end else begin
-                    `uvm_info(get_full_name(), $sformatf("SERIAL IS INCORRECT"), UVM_LOW);
-                    error = 1;
+                    `uvm_info(get_full_name(), $sformatf("SERIAL DATA IS INCORRECT"), UVM_LOW);
                 end
+                
+               
              end   
         end            
     endtask: compare_trans

@@ -33,10 +33,10 @@ interface serializer_if #(parameter DATA_WIDTH=8)
     modport RCV (clocking rc_cb, input clk, reset);
     
     //montior fast output
-    clocking rc_cb_fast@(negedge clk_fast);
+    clocking rc_cb_fast@(posedge clk_fast);
         input out_data;
     endclocking
-    modport RCV_fast (clocking rc_cb_fast, input clk_fast, rst_n);
+    modport RCV_fast (clocking rc_cb_fast, input clk_fast, reset);
     
 endinterface: serializer_if
 
@@ -245,7 +245,7 @@ module serializer #(parameter DATA_WIDTH=8)
           end
           else if (r_Counter <= 9) begin //so we dont access beyond array length
             r_Counter <= r_Counter + 1;
-            r1_Data <= r_10B[r_Counter]; //slow data in 
+            r1_Data <= r_10B[r_Counter]; //slow data in, LSB first
             r2_Data <= r1_Data;
           end
           else begin //continues to shift data after all has been moved into shift register

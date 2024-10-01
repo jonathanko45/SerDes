@@ -562,6 +562,10 @@ class ser_ref_model extends uvm_component;
            endcase
         end
         
+        for(int i = 0; i < 10; i++) begin
+            rm_queue.push_back(exp_trans.out_10b[i]);
+        end
+        
         if (exp_trans.out_10b[0]+exp_trans.out_10b[1]+exp_trans.out_10b[2]+exp_trans.out_10b[3]+exp_trans.out_10b[4]+exp_trans.out_10b[5]+exp_trans.out_10b[6]+exp_trans.out_10b[7]+exp_trans.out_10b[8]+exp_trans.out_10b[9] > 5)
           exp_trans.out_RD = 2'sb01; //RD = +1 (more 1s then +1 RD)
         else if (exp_trans.out_10b[0]+exp_trans.out_10b[1]+exp_trans.out_10b[2]+exp_trans.out_10b[3]+exp_trans.out_10b[4]+exp_trans.out_10b[5]+exp_trans.out_10b[6]+exp_trans.out_10b[7]+exp_trans.out_10b[8]+exp_trans.out_10b[9] < 5)
