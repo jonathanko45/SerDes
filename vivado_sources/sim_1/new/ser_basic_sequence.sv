@@ -3,23 +3,16 @@
 
 class ser_basic_sequence extends uvm_sequence #(ser_transaction);
     `uvm_object_utils(ser_basic_sequence)
-    
-    int RD;
-    
+   
     function new(string name = "ser_basic_sequence");
         super.new(name);
     endfunction
     
     virtual task body();
-        for(int i = 0; i < 100; i++) begin
+        for(int i = 0; i < 400; i++) begin
             req = ser_transaction::type_id::create("req");
             start_item(req);
-
             assert(req.randomize());
-            
-            uvm_config_db#(int)::get(null, this.get_full_name(), "running_disparity", RD);
-            req.in_RD = RD;
-            
             `uvm_info(get_full_name(), $sformatf("RANDOMIZED TRANSACTION FROM SEQUENCE"), UVM_LOW);
             req.print();
             finish_item(req);

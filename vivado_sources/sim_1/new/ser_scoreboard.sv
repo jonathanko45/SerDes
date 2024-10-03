@@ -65,10 +65,12 @@ class ser_scoreboard extends uvm_scoreboard;
                     `uvm_info(get_full_name(), $sformatf("                  %0b | %0b ", exp_ser, act_ser), UVM_LOW);
                 end
                 
+
                 if (exp_trans.out_10b == act_trans.out_10b) begin
                     `uvm_info(get_full_name(), $sformatf("10b MATCHES"), UVM_LOW);
                 end else begin
                     `uvm_info(get_full_name(), $sformatf("10b INCORRECT"), UVM_LOW);
+                    `uvm_fatal(get_full_name(), $sformatf("10b INCORRECT"));
                     error = 1;
                 end
                 
@@ -76,9 +78,7 @@ class ser_scoreboard extends uvm_scoreboard;
                     `uvm_info(get_full_name(), $sformatf("SERIAL DATA MATCHES"), UVM_LOW);
                 end else begin
                     `uvm_info(get_full_name(), $sformatf("SERIAL DATA IS INCORRECT"), UVM_LOW);
-                end
-                
-               
+                end  
              end   
         end            
     endtask: compare_trans

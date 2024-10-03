@@ -41,8 +41,9 @@ class ser_driver extends uvm_driver #(ser_transaction);
     virtual task reset();
          `uvm_info(get_type_name(), "Resetting Signals", UVM_LOW);
          vif.dr_cb.in_data <= 8'b00000000;
+         vif.dr_cb.in_RD <= 2'sb11;
          vif.dr_cb.rst_n <= 0;
-         //vif.dr_cb.in_RD <= 2'sb11; maybe?
+         //@(vif.dr_cb);
     endtask: reset
     
     virtual task drive();

@@ -11,7 +11,7 @@ module Serializer_TB;
     bit clk;
     bit clk_fast;
     bit reset;
-    
+
     serializer_if ser_intf (.clk(clk),
                             .clk_fast(clk_fast),
                             .reset(reset));
@@ -36,7 +36,7 @@ module Serializer_TB;
 
     initial begin
         uvm_config_db#(virtual serializer_if)::set(uvm_root::get(), "*", "intf", ser_intf);
-        uvm_config_db#(int)::set(uvm_root::get(), "*", "running_disparity", 2'sb11); //initial setting of RD
+        uvm_config_db#(int)::set(null, "*", "running_disparity", 2'sb11); //initial setting of RD
         run_test();
     end
     

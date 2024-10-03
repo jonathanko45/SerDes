@@ -6,7 +6,7 @@ interface serializer_if #(parameter DATA_WIDTH=8)
      input reset);
     
     logic [DATA_WIDTH-1:0] in_data;
-    logic signed in_RD;
+    logic signed [1:0] in_RD;
     logic rst_n;
     logic out_data;
     logic [9:0] out_10b;
@@ -45,12 +45,13 @@ module serializer #(parameter DATA_WIDTH=8)
    input i_Clk_Fast,
    input i_rst_n,
    input [DATA_WIDTH-1:0] i_Data, 
-   input signed [1:0] i_RD,
+   input [1:0] i_RD,
    output o_Ser_Data,
    output reg [9:0] o_10B,
    output reg signed [1:0] o_RD);
 
-  reg signed [1:0] r_RD = i_RD; //RD = 2'sb11 =-1
+  reg signed [1:0] r_RD; //RD = 2'sb11 =-1
+  reg signed [1:0] r_RD_init;
   reg [3:0] r_4B;
   reg [5:0] r_6B;
   reg [9:0] r_10B;
@@ -60,12 +61,18 @@ module serializer #(parameter DATA_WIDTH=8)
   reg r1_Data; //2 registers for speeding up data
   reg r2_Data;
   
+  always @(i_RD) begin
+    r_RD = i_RD;
+    r_RD_init = i_RD;
+  end
+  
   always @(posedge i_Clk) begin //must be sequential since depends on previous value (RD)
     if (!i_rst_n) begin
       r_4B <= 0;
       r_6B <= 0;
       r_10B <= 0;
       r_RD <= 2'sb11; //RD = -1
+      r_RD_init <= 2'sb11;
       r_Data_Stage <= 3'b000;
     end else begin 
       if (r_Data_Stage == 3'b000) begin
@@ -74,7 +81,7 @@ module serializer #(parameter DATA_WIDTH=8)
             if (r_RD == 2'sb11)
               r_6B <= 6'b100111;
             else if (r_RD == 2'sb01)
-              r_6B <= 011000;
+              r_6B <= 6'b011000;
           end
           5'b00001 : begin
             if (r_RD == 2'sb11)
@@ -199,11 +206,18 @@ module serializer #(parameter DATA_WIDTH=8)
           end
           3'b101 : r_4B <= 4'b1010;
           3'b110 : r_4B <= 4'b0110;
-          3'b111 : begin
-            if (r_RD == 2'sb11) 
-              r_4B <= 4'b1110;
-            else if (r_RD == 2'sb01) 
-              r_4B <= 4'b0001;
+          3'b111 : begin //special cases
+            if (r_RD == 2'sb11) begin
+              if (r_6B == 6'b100011 || r_6B == 6'b010011 || r_6B == 6'b001011)
+                r_4B <= 4'b0111;
+              else
+                r_4B <= 4'b1110; 
+            end else if (r_RD == 2'sb01) begin
+              if (r_6B == 6'b110100 || r_6B == 6'b101100 || r_6B == 6'b011100)
+                r_4B <= 4'b1000;
+              else
+                r_4B <= 4'b0001;
+            end
           end
           default : r_4B <= 4'b0000;
         endcase
@@ -215,17 +229,19 @@ module serializer #(parameter DATA_WIDTH=8)
   //should be combinational block
   always @(r_Data_Stage) begin
     if (r_Data_Stage == 3'b001) begin
-        if (r_6B[0]+r_6B[1]+r_6B[2]+r_6B[3]+r_6B[4]+r_6B[5] > 3)
+        if ($countones(r_6B) > 3)
           r_RD = 2'sb01; //RD = +1 (more 1s then +1 RD)
-        else if (r_6B[0]+r_6B[1]+r_6B[2]+r_6B[3]+r_6B[4]+r_6B[5] < 3)
+        else if ($countones(r_6B) < 3)
           r_RD = 2'sb11; //RD = -1 (more 0s then -1 RD)
     end else if (r_Data_Stage == 3'b010) begin
         r_10B = {r_6B, r_4B}; //r_10B fully created
         //calculate running disparity here
-        if (r_10B[0]+r_10B[1]+r_10B[2]+r_10B[3]+r_10B[4]+r_10B[5]+r_10B[6]+r_10B[7]+r_10B[8]+r_10B[9] > 5)
+        if ($countones(r_10B) > 5)
           r_RD = 2'sb01; //RD = +1 (more 1s then +1 RD)
-        else if (r_10B[0]+r_10B[1]+r_10B[2]+r_10B[3]+r_10B[4]+r_10B[5]+r_10B[6]+r_10B[7]+r_10B[8]+r_10B[9] < 5)
+        else if ($countones(r_10B) < 5)
           r_RD = 2'sb11; //RD = -1 (more 0s then -1 RD)
+        else
+          r_RD = r_RD_init; //if 1s and 0s equal and want to keep initial RD
         r_Data_Stage = 3'b011;
     end
   end

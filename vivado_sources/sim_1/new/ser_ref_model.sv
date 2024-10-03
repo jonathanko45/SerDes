@@ -10,7 +10,6 @@ class ser_ref_model extends uvm_component;
     ser_transaction exp_trans, rm_trans;
     uvm_tlm_analysis_fifo#(ser_transaction) rm_exp_fifo;
     uvm_queue#(int) rm_queue = uvm_queue_pool::get_global("queue_key_rm");
-    int RD;
     
     function new(string name = "ser_ref_model", uvm_component parent);
         super.new(name, parent);
@@ -21,8 +20,6 @@ class ser_ref_model extends uvm_component;
         rm_export = new("rm_export", this);
         rm2sb_port = new("rm2sb_port", this);
         rm_exp_fifo = new("rm_exp_fifo", this);
-        if(!uvm_config_db#(int)::get(this, "", "running_disparity", RD))
-            `uvm_fatal("NO RD", {"Running Disparity must be set for: ", get_full_name(), ".RD"})
     endfunction: build_phase
     
     function void connect_phase(uvm_phase phase);
@@ -39,8 +36,8 @@ class ser_ref_model extends uvm_component;
      
      task get_expected_transaction(ser_transaction rm_trans);
         this.exp_trans = rm_trans;
-        exp_trans.in_RD = RD;
-        if (RD == 2'sb11) begin
+        
+        if (exp_trans.in_RD == 2'sb11) begin
             case (exp_trans.in_data)
                 8'b00000000 : exp_trans.out_10b = 10'b1001110100;
                 8'b00000001 : exp_trans.out_10b = 10'b0111010100;
@@ -300,7 +297,7 @@ class ser_ref_model extends uvm_component;
                 8'b11111111 : exp_trans.out_10b = 10'b1010110001;
                 default : exp_trans.out_10b = 10'b0000000000;
             endcase
-        end else if(RD == 2'sb01) begin
+        end else if(exp_trans.in_RD == 2'sb01) begin
             case (exp_trans.in_data)
                 8'b00000000 : exp_trans.out_10b = 10'b0110001011;
                 8'b00000001 : exp_trans.out_10b = 10'b1000101011;
@@ -566,9 +563,9 @@ class ser_ref_model extends uvm_component;
             rm_queue.push_back(exp_trans.out_10b[i]);
         end
         
-        if (exp_trans.out_10b[0]+exp_trans.out_10b[1]+exp_trans.out_10b[2]+exp_trans.out_10b[3]+exp_trans.out_10b[4]+exp_trans.out_10b[5]+exp_trans.out_10b[6]+exp_trans.out_10b[7]+exp_trans.out_10b[8]+exp_trans.out_10b[9] > 5)
+        if ($countones(exp_trans.out_10b) > 5)
           exp_trans.out_RD = 2'sb01; //RD = +1 (more 1s then +1 RD)
-        else if (exp_trans.out_10b[0]+exp_trans.out_10b[1]+exp_trans.out_10b[2]+exp_trans.out_10b[3]+exp_trans.out_10b[4]+exp_trans.out_10b[5]+exp_trans.out_10b[6]+exp_trans.out_10b[7]+exp_trans.out_10b[8]+exp_trans.out_10b[9] < 5)
+        else if ($countones(exp_trans.out_10b) < 5)
           exp_trans.out_RD = 2'sb11; //RD = -1 (more 0s then -1 RD)
         else
           exp_trans.out_RD = exp_trans.in_RD;
