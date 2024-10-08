@@ -2,7 +2,7 @@
 `define DES_MONITOR
 
 class des_monitor extends uvm_monitor;
-    virtual interface serializer_if vif;
+    virtual interface serializer_if s_vif;
     
     //des_monitor to des_sequencer port
     uvm_analysis_port #(ser_transaction) mon2seq_port; //geting transaction from serializer intf
@@ -18,8 +18,8 @@ class des_monitor extends uvm_monitor;
     
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
-        if(!uvm_config_db#(virtual serializer_if)::get(this, "", "intf", vif))
-            `uvm_fatal("NOVIF", ("Virtual Interface must be set for: ", get_full_name(), ".vif"))
+        if(!uvm_config_db#(virtual serializer_if)::get(this, "", "ser_intf", s_vif))
+            `uvm_fatal("NOVIF", {"Virtual Interface must be set for: ", get_full_name(), ".s_vif"})
         `uvm_info(get_full_name(), "Build stage complete", UVM_LOW)
     endfunction: build_phase
     

@@ -3,9 +3,9 @@
 
 class ser_agent extends uvm_agent;
 
-    ser_sequencer sequencer;
-    ser_driver    driver;
-    ser_monitor   monitor;
+    ser_sequencer s_sequencer;
+    ser_driver    s_driver;
+    ser_monitor   s_monitor;
     
     `uvm_component_utils(ser_agent)
 
@@ -15,14 +15,14 @@ class ser_agent extends uvm_agent;
      
      function void build_phase(uvm_phase phase); //creates sequencer,driver, and monitor
         super.build_phase(phase);
-        sequencer = ser_sequencer::type_id::create("sequencer", this);
-        driver = ser_driver::type_id::create("driver", this);
-        monitor = ser_monitor::type_id::create("monitor", this);
+        s_sequencer = ser_sequencer::type_id::create("s_sequencer", this);
+        s_driver = ser_driver::type_id::create("s_driver", this);
+        s_monitor = ser_monitor::type_id::create("s_monitor", this);
         `uvm_info(get_full_name(), "Build Stage Complete", UVM_LOW)
      endfunction: build_phase
      
      function void connect_phase(uvm_phase phase);
-         driver.seq_item_port.connect(sequencer.seq_item_export);
+         s_driver.seq_item_port.connect(s_sequencer.seq_item_export);
         `uvm_info(get_full_name(), "Connect Stage Complete", UVM_LOW)
      endfunction: connect_phase
 endclass: ser_agent

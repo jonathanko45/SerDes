@@ -26,7 +26,7 @@ interface deserializer_if
         output r_en;
         input out_8b;
     endclocking
-    modport DRV_fast (clocking dr_cb, input clk, reset);
+    modport DRV_fast (clocking dr_cb_fast, input clk, reset);
     
     //for passive des monitor
     clocking rc_cb@(negedge clk);
@@ -45,4 +45,4 @@ interface deserializer_if
     
 endinterface: deserializer_if
     
-    
+`endif

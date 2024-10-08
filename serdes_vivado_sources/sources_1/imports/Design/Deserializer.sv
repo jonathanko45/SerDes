@@ -1,11 +1,11 @@
 
-module deserializer #(parameter DEPTH=8)
-  (input i_Wclk, i_Wrst_n, i_W_en,
-   input i_Rclk, i_Rrst_n, i_R_en,
-   input i_Data_In,
-   output reg [7:0] o_Data,
-   output reg o_FIFO_Out,
-   output reg o_full, o_empty);
+module deserializer (
+    input i_Wclk, i_Wrst_n, i_W_en,
+    input i_Rclk, i_Rrst_n, i_R_en,
+    input i_Data_In,
+    output reg [7:0] o_Data,
+    output reg o_FIFO_Out,
+    output reg o_full, o_empty);
  
   reg [9:0] r_Des_Data = 10'b0000000000;
   reg [9:0] r_Counter = 0;

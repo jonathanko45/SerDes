@@ -2,9 +2,9 @@
 `define DES_DRIVER
 
 class des_driver extends uvm_driver #(des_transaction);
-    virtual interface deserializer_if vif;
+    virtual interface deserializer_if d_vif;
     
-    //des_transaction m_item;
+    des_transaction m_item;
     
     `uvm_component_utils(des_driver)
     
@@ -14,15 +14,15 @@ class des_driver extends uvm_driver #(des_transaction);
     
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
-        if(!uvm_config_db#(virtual deserializer_if)::get(this, "", "intf", vif))
-            `uvm_fatal("NOVIF", {"Virtual Interface must be set for: ", get_full_name(), ".vif"})
+        if(!uvm_config_db#(virtual deserializer_if)::get(this, "", "des_intf", d_vif))
+            `uvm_fatal("NOVIF", {"Virtual Interface must be set for: ", get_full_name(), ".d_vif"})
         `uvm_info(get_full_name(), "Build Stage Complete", UVM_LOW)
     endfunction: build_phase
     
     virtual task run_phase(uvm_phase phase);
         reset();
         forever begin
-            seq_item_port.get_next_itme(slave_req);
+            seq_item_port.get_next_item(m_item);
             drive();
             seq_item_port.item_done();
         end

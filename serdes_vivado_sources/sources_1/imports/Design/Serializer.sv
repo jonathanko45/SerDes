@@ -235,4 +235,3 @@ module serializer
   assign o_RD = r_RD;
   
 endmodule
-
