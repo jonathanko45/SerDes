@@ -35,8 +35,9 @@ module serdes_tb_top;
                           .i_W_en(des_intf.w_en), 
                           .i_Rclk(clk), 
                           .i_Rrst_n(des_intf.rrst_n), 
-                          .i_R_en(des_intf.r_en), 
-                          .i_Data_In(des_intf.in_10b), 
+                          .i_R_en(des_intf.r_en),
+                          .i_rst_n(des_intf.rst_n), 
+                          .i_Data_In(des_intf.in_data), 
                           .o_Data(des_intf.out_8b),
                           .o_FIFO_Out(), //not sure if need these
                           .o_full(), 

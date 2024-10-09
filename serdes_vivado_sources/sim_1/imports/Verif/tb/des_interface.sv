@@ -6,7 +6,7 @@ interface deserializer_if
      input clk_fast,
      input reset);
      
-    logic [9:0] in_10b;
+    logic in_data;
     logic rst_n; //maybe can merge with another reset
     logic [7:0] out_8b;
     
@@ -18,7 +18,7 @@ interface deserializer_if
     
     //for des driver, fast input
     clocking dr_cb_fast@(posedge clk_fast);
-        output in_10b;
+        output in_data;
         output rst_n;
         output wrst_n;
         output w_en;
@@ -30,7 +30,7 @@ interface deserializer_if
     
     //for passive des monitor
     clocking rc_cb@(negedge clk);
-        input in_10b;
+        input in_data;
         input rst_n;
         input out_8b; //might be the only value needed
         input wrst_n;

@@ -8,6 +8,8 @@ class des_monitor extends uvm_monitor;
     uvm_analysis_port #(ser_transaction) mon2seq_port; //geting transaction from serializer intf
     ser_transaction mon_trans;
     
+    bit [9:0] out_bits;
+    
     `uvm_component_utils(des_monitor)
     
     function new(string name, uvm_component parent);
@@ -25,16 +27,19 @@ class des_monitor extends uvm_monitor;
     
     task monitor_bus();
         forever begin
-        
+            wait(!s_vif.reset);
             //need logic here to have equivalent of below
             //also need to pass info into a transaction
             //im thinking just a 10bit array 
-            /*
-            repeat(10) begin
-                mon_queue.push_back(vif.rc_cb_fast.out_data);
-                @(vif.rc_cb_fast);
+            repeat (3)@(s_vif.rc_cb);
+            @(s_vif.dr_cb);
+            repeat(3) @(s_vif.rc_cb_fast);
+            for(int i = 0; i < 10; i++) begin
+                out_bits[i] <= s_vif.rc_cb_fast.out_data;
+                @(s_vif.rc_cb_fast);
             end
-            */
+            mon_trans.out_10b <= out_bits;
+  
             mon2seq_port.write(mon_trans);
         end
     endtask

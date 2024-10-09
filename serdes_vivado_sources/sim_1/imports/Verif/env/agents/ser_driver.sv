@@ -38,7 +38,7 @@ class ser_driver extends uvm_driver #(ser_transaction);
     endtask: run_phase
     
     virtual task reset();
-         `uvm_info(get_type_name(), "Resetting Signals", UVM_LOW);
+         `uvm_info(get_type_name(), "Resetting Serializer Signals", UVM_LOW);
          s_vif.dr_cb.in_data <= 8'b00000000;
          s_vif.dr_cb.in_RD <= 2'sb11;
          s_vif.dr_cb.rst_n <= 0;

@@ -2,6 +2,7 @@
 module deserializer (
     input i_Wclk, i_Wrst_n, i_W_en,
     input i_Rclk, i_Rrst_n, i_R_en,
+    input i_rst_n,
     input i_Data_In,
     output reg [7:0] o_Data,
     output reg o_FIFO_Out,
@@ -29,8 +30,15 @@ module deserializer (
 
   //deserializes the data
   always @(posedge i_Rclk) begin
-    if (i_R_en) begin
-      if (r_Counter < 10) begin 
+    if (!i_rst_n) begin
+      r_Des_Data <= 0;
+      r_Counter <= 0;
+      r_3B <= 0;
+      r_5B <= 0;
+      r_8B <= 0;
+      r_Data_Ready <= 0;
+    end else begin
+      if (i_R_en && r_Counter < 10) begin 
         r_Des_Data[9] <= o_FIFO_Out; //put it in reverse order from recieved
         r_Des_Data[7:0] <= r_Des_Data[8:1];
       	r_Counter <= r_Counter + 1;
@@ -104,6 +112,8 @@ module deserializer (
         4'b0110 : r_3B <= 3'b110;
         4'b1110 : r_3B <= 3'b111;
         4'b0001 : r_3B <= 3'b111;
+        4'b0111 : r_3B <= 3'b111;
+        4'b1000 : r_3B <= 3'b111;
         default : r_3B <= 3'b000;
       endcase  
     end
