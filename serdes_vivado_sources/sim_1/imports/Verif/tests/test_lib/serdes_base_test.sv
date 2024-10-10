@@ -21,13 +21,15 @@ class serdes_base_test extends uvm_test;
      
      virtual task run_phase(uvm_phase phase);
         //slave_seq.p_sequencer = env.d_agent.d_sequencer; //not sure
-        phase.raise_objection(this);
-        fork //not sure about this fork
-            seq.start(env.s_agent.s_sequencer);
+        fork 
             slave_seq.start(env.d_agent.d_sequencer);
         join_none
+        phase.raise_objection(this);
+        seq.start(env.s_agent.s_sequencer);
         phase.drop_objection(this);
+  
     endtask: run_phase
+     
 endclass: serdes_base_test
 
 `endif

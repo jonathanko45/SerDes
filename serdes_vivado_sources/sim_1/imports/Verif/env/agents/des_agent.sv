@@ -23,7 +23,7 @@ class des_agent extends uvm_agent;
      
      function void connect_phase(uvm_phase phase);
         d_driver.seq_item_port.connect(d_sequencer.seq_item_export);
-        d_monitor.mon2seq_port.connect(d_sequencer.req_export); //monitor to sequencer
+        d_monitor.mon2seq_port.connect(d_sequencer.d_seq_export); //monitor to sequencer
         `uvm_info(get_full_name(), "Connect Stage Complete", UVM_LOW)
      endfunction: connect_phase
      

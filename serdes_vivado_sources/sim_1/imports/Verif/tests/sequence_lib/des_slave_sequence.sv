@@ -14,10 +14,9 @@ class des_slave_sequence extends uvm_sequence #(des_transaction);
     
     virtual task body();
         forever begin
-            p_sequencer.request_fifo.get(mon_trans); //blocking until gets transaction from montior
+            p_sequencer.d_seq_exp_fifo.get(mon_trans); //blocking until gets transaction from montior
             //copy data from ser_transaction into a new des_transaction
-            `uvm_do_with(slave_req, {slave_req.in_10b == mon_trans.out_10b;});            
-            `uvm_info(get_full_name(), $sformatf("SLAVE TRANSACTION FROM DES_SEQUENCE"), UVM_LOW);
+            `uvm_do_with(slave_req, {slave_req.in_10b == mon_trans.out_10b;});
         end
     endtask: body
     

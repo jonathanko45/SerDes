@@ -24,6 +24,8 @@ class des_driver extends uvm_driver #(des_transaction);
         forever begin
             seq_item_port.get_next_item(m_item);
             drive();
+            `uvm_info(get_full_name(), $sformatf("TRANSACTION FROM DRIVER to DESERIALIZER"), UVM_LOW);
+            m_item.print();
             seq_item_port.item_done();
         end
     endtask: run_phase

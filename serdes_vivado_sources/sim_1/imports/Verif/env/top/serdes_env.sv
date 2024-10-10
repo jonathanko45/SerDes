@@ -21,6 +21,13 @@ class serdes_env extends uvm_env;
         s_sb = ser_scoreboard::type_id::create("s_sb", this);
         ref_model = ser_ref_model::type_id::create("ref_model", this);
         coverage = serdes_coverage#(ser_transaction)::type_id::create("coverage", this);
+        /*
+        uvm_config_db #(uvm_object_wrapper)::set(
+                        this, 
+                        "env.d_agent.d_sequencer.main_phase",
+                        "default_sequence",
+                        des_slave_sequence::type_id::get());
+        */
         `uvm_info(get_full_name(), "Build Stage Complete", UVM_LOW)
      endfunction: build_phase
      

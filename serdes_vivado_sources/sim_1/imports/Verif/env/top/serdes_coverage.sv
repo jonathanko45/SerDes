@@ -19,7 +19,7 @@ class serdes_coverage extends uvm_subscriber #(ser_transaction);
      function new(string name, uvm_component parent);
         super.new(name, parent);
         cg = new();
-        cov_trans =new();
+        cov_trans = new();
      endfunction: new
      
      function void write (ser_transaction t);

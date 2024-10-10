@@ -25,23 +25,28 @@ class des_monitor extends uvm_monitor;
         `uvm_info(get_full_name(), "Build stage complete", UVM_LOW)
     endfunction: build_phase
     
-    task monitor_bus();
+    virtual task run_phase(uvm_phase phase);
         forever begin
-            wait(!s_vif.reset);
-            //need logic here to have equivalent of below
-            //also need to pass info into a transaction
-            //im thinking just a 10bit array 
-            repeat (3)@(s_vif.rc_cb);
-            @(s_vif.dr_cb);
-            repeat(3) @(s_vif.rc_cb_fast);
-            for(int i = 0; i < 10; i++) begin
-                out_bits[i] <= s_vif.rc_cb_fast.out_data;
-                @(s_vif.rc_cb_fast);
-            end
-            mon_trans.out_10b <= out_bits;
-  
-            mon2seq_port.write(mon_trans);
+          monitor_bus();
+          mon2seq_port.write(mon_trans);
         end
+    endtask : run_phase
+     
+    task monitor_bus();
+        wait(!s_vif.reset);
+        //need logic here to have equivalent of below
+        //also need to pass info into a transaction
+        //im thinking just a 10bit array 
+        repeat (3)@(s_vif.rc_cb);
+        @(s_vif.dr_cb);
+        repeat(3) @(s_vif.rc_cb_fast);
+        for(int i = 0; i < 10; i++) begin
+            out_bits[i] <= s_vif.rc_cb_fast.out_data;
+            @(s_vif.rc_cb_fast);
+        end
+        mon_trans.out_10b <= out_bits;
+        `uvm_info(get_full_name(), "DES MONITOR pre write mon_trans", UVM_LOW)
+        mon_trans.print();
     endtask
     
 endclass: des_monitor

@@ -85,17 +85,13 @@ class ser_scoreboard extends uvm_scoreboard;
     
     function void report_phase(uvm_phase phase);
         if(error==0) begin
-          $write("%c[7;32m",27);
-          $display("-------------------------------------------------");
-          $display("------ INFO : TEST CASE PASSED ------------------");
-          $display("-----------------------------------------");
-          $write("%c[0m",27);
+          $display("--------------------------------------------------");
+          $display("------ INFO : TEST CASE PASSED -------------------");
+          $display("--------------------------------------------------");
         end else begin
-          $write("%c[7;31m",27);
           $display("---------------------------------------------------");
           $display("------ ERROR : TEST CASE FAILED ------------------");
           $display("---------------------------------------------------");
-          $write("%c[0m",27);
         end
     endfunction: report_phase
     
