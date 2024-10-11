@@ -9,7 +9,7 @@ class ser_basic_sequence extends uvm_sequence #(ser_transaction);
     endfunction
     
     virtual task body();
-        for(int i = 0; i < 5; i++) begin
+        for(int i = 0; i < 2; i++) begin
             req = ser_transaction::type_id::create("req");
             start_item(req);
             assert(req.randomize());

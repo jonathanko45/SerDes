@@ -4,6 +4,7 @@
 class serdes_env extends uvm_env;
     ser_agent s_agent;
     des_agent d_agent;
+    des_agent_p d_agent_p;
     ser_scoreboard s_sb;
     ser_ref_model ref_model;
     serdes_coverage coverage; //maybe update
@@ -18,16 +19,10 @@ class serdes_env extends uvm_env;
         super.build_phase(phase);        
         s_agent = ser_agent::type_id::create("s_agent", this);
         d_agent = des_agent::type_id::create("d_agent", this);
+        d_agent_p = des_agent_p::type_id::create("d_agent_p", this);
         s_sb = ser_scoreboard::type_id::create("s_sb", this);
         ref_model = ser_ref_model::type_id::create("ref_model", this);
         coverage = serdes_coverage#(ser_transaction)::type_id::create("coverage", this);
-        /*
-        uvm_config_db #(uvm_object_wrapper)::set(
-                        this, 
-                        "env.d_agent.d_sequencer.main_phase",
-                        "default_sequence",
-                        des_slave_sequence::type_id::get());
-        */
         `uvm_info(get_full_name(), "Build Stage Complete", UVM_LOW)
      endfunction: build_phase
      
@@ -37,6 +32,7 @@ class serdes_env extends uvm_env;
         s_agent.s_monitor.mon2sb_port.connect(s_sb.mon2sb_export);
         ref_model.rm2sb_port.connect(coverage.analysis_export);
         ref_model.rm2sb_port.connect(s_sb.rm2sb_export);
+        d_agent_p.d_monitor_p.mon_p2sb_port.connect(s_sb.mon_p2sb_export);
         `uvm_info(get_full_name(), "Connect Phase Complete", UVM_LOW)
      endfunction: connect_phase
      

@@ -20,6 +20,10 @@ package serdes_agent_pkg;
   `include "des_driver.sv"
   `include "des_sequencer.sv"
   `include "des_agent.sv"
+  
+  //des components (passive slave)
+  `include "des_monitor_p.sv"
+  `include "des_agent_p.sv"
 
 endpackage
 

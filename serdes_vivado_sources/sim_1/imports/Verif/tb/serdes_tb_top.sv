@@ -59,10 +59,11 @@ module serdes_tb_top;
         run_test();
     end
     
+    /*
     initial begin
       uvm_pkg::uvm_wait_for_nba_region();
       uvm_pkg::uvm_top.print_topology();
-    end
+    end*/
     
 endmodule
 

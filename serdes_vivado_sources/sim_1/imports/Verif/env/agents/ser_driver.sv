@@ -25,7 +25,8 @@ class ser_driver extends uvm_driver #(ser_transaction);
         forever begin
             seq_item_port.get_next_item(req);
             drive();
-            `uvm_info(get_full_name(), $sformatf("TRANSACTION FROM DRIVER"), UVM_LOW);
+            `uvm_info(get_type_name(), $sformatf("TRANSACTION FROM DRIVER"), UVM_LOW);
+            //`uvm_info(get_full_name(), $sformatf("TRANSACTION FROM DRIVER"), UVM_LOW);
             req.print();
             repeat (2) @(s_vif.dr_cb);
             @(s_vif.rc_cb); //one of each so monitor synchs with ref model

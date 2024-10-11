@@ -44,8 +44,13 @@ class des_monitor extends uvm_monitor;
             out_bits[i] <= s_vif.rc_cb_fast.out_data;
             @(s_vif.rc_cb_fast);
         end
-        mon_trans.out_10b <= out_bits;
-        `uvm_info(get_full_name(), "DES MONITOR pre write mon_trans", UVM_LOW)
+        @(s_vif.rc_cb);
+        $display("out_10b real: %0b", s_vif.rc_cb.out_10b);
+        $display("out_10b bits: %0b", out_bits);
+        mon_trans.out_10b = out_bits;
+         $display("out_10b bits mon: %0b", mon_trans.out_10b);
+        `uvm_info(get_type_name(), "DES MONITOR write to sequencer", UVM_LOW)
+        //`uvm_info(get_full_name(), "DES MONITOR pre write mon_trans", UVM_LOW)
         mon_trans.print();
     endtask
     

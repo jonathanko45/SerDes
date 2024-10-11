@@ -5,9 +5,13 @@ class ser_scoreboard extends uvm_scoreboard;
     //analysis ports and exports 
     //rm = reference model, mon = monitor, sb = scoreboard
     uvm_analysis_export#(ser_transaction) rm2sb_export,  mon2sb_export;
+    uvm_analysis_export#(des_transaction)mon_p2sb_export;
     uvm_tlm_analysis_fifo #(ser_transaction) rm2sb_export_fifo, mon2sb_export_fifo;
+    uvm_tlm_analysis_fifo #(des_transaction) mon_p2sb_export_fifo;
     ser_transaction exp_trans, act_trans;
     ser_transaction exp_trans_fifo[$], act_trans_fifo[$];
+    des_transaction d_act_trans;
+    des_transaction d_act_trans_fifo[$]; //not sure if need
     bit error;
     
     uvm_queue#(int) mon_queue = uvm_queue_pool::get_global("queue_key_mon");
@@ -23,8 +27,10 @@ class ser_scoreboard extends uvm_scoreboard;
         super.build_phase(phase);
         rm2sb_export = new("rm2sb_export", this);
         mon2sb_export = new("mon2sb_export", this);
+        mon_p2sb_export = new("mon_p2sb_export", this);
         rm2sb_export_fifo = new("rm2sb_export_fifo", this);
         mon2sb_export_fifo = new("mon2sb_export_fifo", this);
+        mon_p2sb_export_fifo = new("mon_p2sb_export_fifo", this);
         `uvm_info(get_full_name(), "Build Stage Complete", UVM_LOW)
     endfunction: build_phase
      
@@ -32,6 +38,7 @@ class ser_scoreboard extends uvm_scoreboard;
         super.connect_phase(phase);
         rm2sb_export.connect(rm2sb_export_fifo.analysis_export);
         mon2sb_export.connect(mon2sb_export_fifo.analysis_export);
+        mon_p2sb_export.connect(mon_p2sb_export_fifo.analysis_export);
     endfunction: connect_phase
     
     //comparing expected and actual transactions 
@@ -45,6 +52,10 @@ class ser_scoreboard extends uvm_scoreboard;
             rm2sb_export_fifo.get(exp_trans);
             if(exp_trans==null) $stop;
             exp_trans_fifo.push_back(exp_trans);
+            
+            //need to add features here to get stuff from passive monitor
+            //maybe do it after compare_trans() in a seperate comparison task
+            
             compare_trans();
         end
     endtask: run_phase
@@ -84,13 +95,13 @@ class ser_scoreboard extends uvm_scoreboard;
     endtask: compare_trans
     
     function void report_phase(uvm_phase phase);
-        if(error==0) begin
+        if(error == 0) begin
           $display("--------------------------------------------------");
           $display("------ INFO : TEST CASE PASSED -------------------");
           $display("--------------------------------------------------");
         end else begin
           $display("---------------------------------------------------");
-          $display("------ ERROR : TEST CASE FAILED ------------------");
+          $display("------ ERROR : TEST CASE FAILED -------------------");
           $display("---------------------------------------------------");
         end
     endfunction: report_phase
