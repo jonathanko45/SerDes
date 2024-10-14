@@ -33,7 +33,7 @@ class des_monitor_p extends uvm_monitor;
         wait(!d_vif.reset);
         
         //just need wait until output valid
-        repeat (5)@(d_vif.rc_cb);
+        repeat(14)@(d_vif.rc_cb);
 
         d_act_trans.out_8b = d_vif.rc_cb.out_8b;
               

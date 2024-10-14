@@ -216,14 +216,10 @@ module serializer
           if (r_Counter == 11) begin //10 bits now + 2 cycles to make it through shift register
             r_Counter <= 0; 
             r_Data_Stage <= 3'b000;
-          end
-          else if (r_Counter <= 9) begin //so we dont access beyond array length
-            r_Counter <= r_Counter + 1;
-            r1_Data <= r_10B[r_Counter]; //slow data in, LSB first
-            r2_Data <= r1_Data;
-          end
-          else begin //continues to shift data after all has been moved into shift register
-            r_Counter <= r_Counter + 1;
+          end else begin
+            if (r_Counter <= 9)  //so we dont access beyond array length
+                r1_Data <= r_10B[r_Counter]; //slow data in, LSB first
+            r_Counter <= r_Counter + 1; //continues to shift data after all has been moved into shift register
             r2_Data <= r1_Data;
           end
         end

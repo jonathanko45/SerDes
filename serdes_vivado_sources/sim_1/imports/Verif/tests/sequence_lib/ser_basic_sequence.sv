@@ -15,7 +15,9 @@ class ser_basic_sequence extends uvm_sequence #(ser_transaction);
             assert(req.randomize());
             `uvm_info(get_full_name(), $sformatf("RANDOMIZED TRANSACTION FROM SEQUENCE"), UVM_LOW);
             req.print();
-            finish_item(req);
+            finish_item(req); //sends item to driver
+            
+            //blocking call
             get_response(rsp); //getting response from clone sent to ref model
         end
     endtask: body

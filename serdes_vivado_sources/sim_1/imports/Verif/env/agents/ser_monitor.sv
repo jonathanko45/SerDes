@@ -7,6 +7,7 @@ class ser_monitor extends uvm_monitor;
     uvm_analysis_port #(ser_transaction) mon2sb_port;
     ser_transaction act_trans;
     uvm_queue#(int) mon_queue = uvm_queue_pool::get_global("queue_key_mon");
+    uvm_event des_done;
     
     `uvm_component_utils(ser_monitor)
     
@@ -20,6 +21,8 @@ class ser_monitor extends uvm_monitor;
         super.build_phase(phase);
         if(!uvm_config_db#(virtual serializer_if)::get(this, "", "ser_intf", s_vif))
             `uvm_fatal("NOVIF", {"Virtual Interface must be set for: ", get_full_name(), ".s_vif"})
+        if(!uvm_config_db#(uvm_event)::get(this, "", "des_done", des_done))
+            `uvm_fatal("NOEVENT", {"Failed to get uvm_event in: ", get_full_name()})
         `uvm_info(get_full_name(), "Build stage complete", UVM_LOW)
       endfunction: build_phase
       
@@ -27,6 +30,7 @@ class ser_monitor extends uvm_monitor;
         forever begin
           collect_trans();
           mon2sb_port.write(act_trans);
+          des_done.wait_trigger;
         end
      endtask : run_phase
       

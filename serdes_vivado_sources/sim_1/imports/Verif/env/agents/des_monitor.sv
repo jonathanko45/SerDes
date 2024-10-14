@@ -7,6 +7,7 @@ class des_monitor extends uvm_monitor;
     //des_monitor to des_sequencer port
     uvm_analysis_port #(ser_transaction) mon2seq_port; //geting transaction from serializer intf
     ser_transaction mon_trans;
+    uvm_event des_done;
     
     bit [9:0] out_bits;
     
@@ -22,6 +23,8 @@ class des_monitor extends uvm_monitor;
         super.build_phase(phase);
         if(!uvm_config_db#(virtual serializer_if)::get(this, "", "ser_intf", s_vif))
             `uvm_fatal("NOVIF", {"Virtual Interface must be set for: ", get_full_name(), ".s_vif"})
+        if(!uvm_config_db#(uvm_event)::get(this, "", "des_done", des_done))
+            `uvm_fatal("NOEVENT", {"Failed to get uvm_event in: ", get_full_name()})
         `uvm_info(get_full_name(), "Build stage complete", UVM_LOW)
     endfunction: build_phase
     
@@ -29,6 +32,7 @@ class des_monitor extends uvm_monitor;
         forever begin
           monitor_bus();
           mon2seq_port.write(mon_trans);
+          des_done.wait_trigger;
         end
     endtask : run_phase
      
@@ -45,10 +49,8 @@ class des_monitor extends uvm_monitor;
             @(s_vif.rc_cb_fast);
         end
         @(s_vif.rc_cb);
-        $display("out_10b real: %0b", s_vif.rc_cb.out_10b);
-        $display("out_10b bits: %0b", out_bits);
+
         mon_trans.out_10b = out_bits;
-         $display("out_10b bits mon: %0b", mon_trans.out_10b);
         `uvm_info(get_type_name(), "DES MONITOR write to sequencer", UVM_LOW)
         //`uvm_info(get_full_name(), "DES MONITOR pre write mon_trans", UVM_LOW)
         mon_trans.print();

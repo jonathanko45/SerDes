@@ -14,7 +14,6 @@ module deserializer (
   reg [2:0] r_3B = 3'b000;
   reg [4:0] r_5B = 5'b00000;
   reg [7:0] r_8B = 8'b00000000;
-  reg r_Data_Ready = 1'b0;
   
   async_FIFO FIFO (.i_Wclk(i_Wclk), 
                    .i_Wrst_n(i_Wrst_n), 
@@ -36,7 +35,6 @@ module deserializer (
       r_3B <= 0;
       r_5B <= 0;
       r_8B <= 0;
-      r_Data_Ready <= 0;
     end else begin
       if (i_R_en && r_Counter < 10) begin 
         r_Des_Data[9] <= o_FIFO_Out; //put it in reverse order from recieved
@@ -48,7 +46,7 @@ module deserializer (
   
   always @(posedge i_Rclk) begin
     if (r_Counter == 10) begin 
-      r_Counter = 0;
+      r_Counter <= 0;
       case (r_Des_Data[9:4])
         6'b100111 : r_5B <= 5'b00000;
         6'b011000 : r_5B <= 5'b00000;

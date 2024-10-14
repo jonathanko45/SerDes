@@ -4,7 +4,7 @@
 class des_driver extends uvm_driver #(des_transaction);
     virtual interface deserializer_if d_vif;
     
-    des_transaction m_item;
+    des_transaction slave_req;
     
     `uvm_component_utils(des_driver)
     
@@ -22,11 +22,8 @@ class des_driver extends uvm_driver #(des_transaction);
     virtual task run_phase(uvm_phase phase);
         reset();
         forever begin
-            seq_item_port.get_next_item(m_item);
+            seq_item_port.get_next_item(slave_req);
             drive();
-            `uvm_info(get_type_name(), $sformatf("TRANSACTION FROM des_driver to DESERIALIZER"), UVM_LOW);
-            //`uvm_info(get_full_name(), $sformatf("TRANSACTION FROM DRIVER to DESERIALIZER"), UVM_LOW);
-            m_item.print();
             seq_item_port.item_done();
         end
     endtask: run_phase
@@ -53,19 +50,19 @@ class des_driver extends uvm_driver #(des_transaction);
         
         //need to figure out how this works. i think because its clocking block I dont need to alternate it?
         d_vif.dr_cb_fast.w_en <= 1'b1; 
-        
+      
         for(int i = 0; i < 10; i++) begin
-            d_vif.dr_cb_fast.in_data <= m_item.in_10b[i];
+            d_vif.dr_cb_fast.in_data <= slave_req.in_10b[i];
             @(d_vif.dr_cb_fast);
         end
         
         //now need to wait a bit until fifo is full and then enable read option
         //montior in passive slave needs to wait until these are enabled before reading
         //@(d_vif.dr_cb);
-        /*
+        
         d_vif.dr_cb_fast.rrst_n <= 1'b1;
         d_vif.dr_cb_fast.r_en <= 1'b1;
-        */
+        
     endtask: drive
     
 endclass: des_driver

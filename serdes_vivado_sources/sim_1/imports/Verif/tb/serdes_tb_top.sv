@@ -20,7 +20,8 @@ module serdes_tb_top;
     
     deserializer_if des_intf (.clk(clk),
                               .clk_fast(clk_fast),
-                              .reset(reset));                        
+                              .reset(reset));       
+                                               
     serializer ser_top (.i_Clk(clk),
                         .i_Clk_Fast(clk_fast),
                         .i_rst_n(ser_intf.rst_n),

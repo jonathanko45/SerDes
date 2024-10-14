@@ -7,6 +7,7 @@ class ser_driver extends uvm_driver #(ser_transaction);
     `uvm_component_utils(ser_driver)
     
     uvm_analysis_port#(ser_transaction) drv2rm_port;
+    uvm_event des_done;
     
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -16,6 +17,8 @@ class ser_driver extends uvm_driver #(ser_transaction);
         super.build_phase(phase);
         if(!uvm_config_db#(virtual serializer_if)::get(this, "", "ser_intf", s_vif))
             `uvm_fatal("NOVIF", {"Virtual Interface must be set for: ", get_full_name(), ".s_vif"})
+        if(!uvm_config_db#(uvm_event)::get(this, "", "des_done", des_done))
+            `uvm_fatal("NOEVENT", {"Failed to get uvm_event in: ", get_full_name()})
         drv2rm_port = new("drv2rm_port", this);
         `uvm_info(get_full_name(), "Build Stage Complete", UVM_LOW)
     endfunction: build_phase
@@ -33,7 +36,15 @@ class ser_driver extends uvm_driver #(ser_transaction);
             $cast(rsp, req.clone()); //making clone of transaction to send to reference model
             rsp.set_id_info(req);
             drv2rm_port.write(rsp);
-            seq_item_port.item_done();
+            seq_item_port.item_done(); //just lets sequencer know driver is done
+            
+
+            //add blocking until scoreboard sees des_monitor is done
+            `uvm_info(get_type_name(), $sformatf("pre wait trigger"), UVM_LOW);
+            des_done.wait_trigger;
+            `uvm_info(get_type_name(), $sformatf("wait trigger finished"), UVM_LOW);
+            des_done.reset;
+            
             seq_item_port.put(rsp);
         end
     endtask: run_phase

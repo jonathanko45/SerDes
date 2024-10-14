@@ -8,6 +8,7 @@ class serdes_env extends uvm_env;
     ser_scoreboard s_sb;
     ser_ref_model ref_model;
     serdes_coverage coverage; //maybe update
+    uvm_event des_done;
     
     `uvm_component_utils(serdes_env)
 
@@ -16,13 +17,15 @@ class serdes_env extends uvm_env;
     endfunction: new
     
     function void build_phase(uvm_phase phase);
-        super.build_phase(phase);        
+        super.build_phase(phase);
         s_agent = ser_agent::type_id::create("s_agent", this);
         d_agent = des_agent::type_id::create("d_agent", this);
         d_agent_p = des_agent_p::type_id::create("d_agent_p", this);
         s_sb = ser_scoreboard::type_id::create("s_sb", this);
         ref_model = ser_ref_model::type_id::create("ref_model", this);
         coverage = serdes_coverage#(ser_transaction)::type_id::create("coverage", this);
+        des_done = new("des_done");
+        uvm_config_db#(uvm_event)::set(null, "*", "des_done", des_done);
         `uvm_info(get_full_name(), "Build Stage Complete", UVM_LOW)
      endfunction: build_phase
      
