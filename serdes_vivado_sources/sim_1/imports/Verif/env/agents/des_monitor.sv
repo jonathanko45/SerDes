@@ -38,9 +38,7 @@ class des_monitor extends uvm_monitor;
      
     task monitor_bus();
         wait(!s_vif.reset);
-        //need logic here to have equivalent of below
-        //also need to pass info into a transaction
-        //im thinking just a 10bit array 
+ 
         repeat (3)@(s_vif.rc_cb);
         @(s_vif.dr_cb);
         repeat(3) @(s_vif.rc_cb_fast);

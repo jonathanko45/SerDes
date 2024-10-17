@@ -36,16 +36,17 @@ class ser_monitor extends uvm_monitor;
       
      virtual task collect_trans();
         wait(!s_vif.reset);
-        
+        `uvm_info(get_type_name(), "post reset ser_monitor", UVM_LOW);
         repeat (3)@(s_vif.rc_cb);
         @(s_vif.dr_cb);
         repeat (3) @(s_vif.rc_cb_fast);
+        `uvm_info(get_type_name(), "ser_monitor starting to collect fast bits", UVM_LOW);
         repeat(10) begin
            mon_queue.push_back(s_vif.rc_cb_fast.out_data);
            @(s_vif.rc_cb_fast);
         end
         @(s_vif.rc_cb);
-        
+         `uvm_info(get_type_name(), "ser_monitor collecting final states", UVM_LOW);
         act_trans.in_data = s_vif.rc_cb.in_data;
         act_trans.in_RD = s_vif.rc_cb.in_RD;
         act_trans.out_10b = s_vif.rc_cb.out_10b;

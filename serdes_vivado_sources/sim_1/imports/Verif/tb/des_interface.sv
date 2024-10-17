@@ -22,11 +22,17 @@ interface deserializer_if
         output rst_n;
         output wrst_n;
         output w_en;
+    endclocking
+    modport DRV_fast (clocking dr_cb_fast, input clk, reset);
+    
+    //for des driver, slow input
+    clocking dr_cb@(posedge clk);
+        output rst_n;
         output rrst_n;
         output r_en;
         input out_8b;
     endclocking
-    modport DRV_fast (clocking dr_cb_fast, input clk, reset);
+    modport DRV (clocking dr_cb, input clk, reset);
     
     //for passive des monitor
     clocking rc_cb@(negedge clk);

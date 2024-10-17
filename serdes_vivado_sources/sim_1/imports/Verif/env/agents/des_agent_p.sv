@@ -15,12 +15,7 @@ class des_agent_p extends uvm_agent;
         d_monitor_p = des_monitor_p::type_id::create("d_monitor_p", this);
         `uvm_info(get_full_name(), "Build Stage Complete", UVM_LOW)
      endfunction: build_phase
-     
-     /*
-     function void connect_phase(uvm_phase phase);
-        `uvm_info(get_full_name(), "Connect Stage Complete", UVM_LOW)
-     endfunction: connect_phase*/
-     
+
 endclass: des_agent_p
 
 `endif

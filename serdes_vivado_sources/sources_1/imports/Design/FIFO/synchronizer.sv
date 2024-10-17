@@ -1,4 +1,4 @@
-module synchronizer #(parameter WIDTH=3) 
+module synchronizer #(parameter WIDTH = 3) 
   (input i_Clk,
    input i_Rst_n,
    input [WIDTH:0] i_d_in,

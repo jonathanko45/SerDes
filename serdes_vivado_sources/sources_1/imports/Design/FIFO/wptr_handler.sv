@@ -1,4 +1,4 @@
-module wptr_handler #(parameter PTR_WIDTH=3)
+module wptr_handler #(parameter PTR_WIDTH = 3)
   (input i_Wclk, i_Wrst_n, i_W_en,
    input [PTR_WIDTH:0] i_g_rptr_sync,
    output reg [PTR_WIDTH:0] o_b_wptr, o_g_wptr,

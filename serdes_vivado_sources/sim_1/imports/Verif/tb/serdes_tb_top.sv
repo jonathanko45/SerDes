@@ -49,7 +49,7 @@ module serdes_tb_top;
     
     initial begin
         reset = 1;
-        @(posedge clk);
+        #300ns
         reset = 0;
     end
 
@@ -59,12 +59,6 @@ module serdes_tb_top;
         uvm_config_db#(int)::set(null, "*", "running_disparity", 2'sb11); //initial setting of RD
         run_test();
     end
-    
-    /*
-    initial begin
-      uvm_pkg::uvm_wait_for_nba_region();
-      uvm_pkg::uvm_top.print_topology();
-    end*/
     
 endmodule
 

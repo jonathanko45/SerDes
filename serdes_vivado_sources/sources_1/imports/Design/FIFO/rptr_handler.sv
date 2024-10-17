@@ -1,11 +1,12 @@
-module rptr_handler #(parameter PTR_WIDTH=3) 
+module rptr_handler #(parameter PTR_WIDTH = 3) 
   (input i_Rclk, i_Rrst_n, i_R_en,
    input [PTR_WIDTH:0] i_g_wptr_sync,
    output reg [PTR_WIDTH:0] o_b_rptr, o_g_rptr,
-   output reg o_empty, o_rempty);
+   output reg o_empty);
   
   reg [PTR_WIDTH:0] r_b_rptr_next;
   reg [PTR_WIDTH:0] r_g_rptr_next;
+  wire o_rempty;
   
   assign r_b_rptr_next = o_b_rptr + (i_R_en & !o_empty); 
   assign r_g_rptr_next = (r_b_rptr_next >> 1)^r_b_rptr_next;

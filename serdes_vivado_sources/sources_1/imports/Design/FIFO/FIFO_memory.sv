@@ -1,4 +1,4 @@
-module FIFO_memory #(parameter DEPTH=8, PTR_WIDTH=3)
+module FIFO_memory #(parameter DEPTH = 8, PTR_WIDTH = 3)
   (input i_Wclk, i_Wrst_n, i_W_en, i_Rclk, i_R_en,
    input [PTR_WIDTH:0] i_b_wptr, i_b_rptr,
    input i_Data_In,

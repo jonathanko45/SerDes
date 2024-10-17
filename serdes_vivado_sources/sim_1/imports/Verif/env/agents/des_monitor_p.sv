@@ -33,9 +33,12 @@ class des_monitor_p extends uvm_monitor;
         wait(!d_vif.reset);
         
         //just need wait until output valid
-        repeat(14)@(d_vif.rc_cb);
+        repeat(29)@(d_vif.rc_cb);
 
         d_act_trans.out_8b = d_vif.rc_cb.out_8b;
+        repeat(2)@(d_vif.rc_cb);
+        //@(d_vif.dr_cb);
+
               
         //`uvm_info(get_full_name(),$sformatf("TRANSACTION FROM passive DES MONITOR"), UVM_LOW);
         `uvm_info(get_type_name(),$sformatf("TRANSACTION FROM passive DES MONITOR"), UVM_LOW);

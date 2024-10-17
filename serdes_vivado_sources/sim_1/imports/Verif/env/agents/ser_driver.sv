@@ -31,20 +31,17 @@ class ser_driver extends uvm_driver #(ser_transaction);
             `uvm_info(get_type_name(), $sformatf("TRANSACTION FROM DRIVER"), UVM_LOW);
             //`uvm_info(get_full_name(), $sformatf("TRANSACTION FROM DRIVER"), UVM_LOW);
             req.print();
-            repeat (2) @(s_vif.dr_cb);
-            @(s_vif.rc_cb); //one of each so monitor synchs with ref model
+            repeat (3) @(s_vif.dr_cb);
+            @(s_vif.rc_cb); //one of each so monitor syncs with ref model
+            `uvm_info(get_type_name(), "ser_driver sending clone to ref", UVM_LOW);
             $cast(rsp, req.clone()); //making clone of transaction to send to reference model
             rsp.set_id_info(req);
             drv2rm_port.write(rsp);
             seq_item_port.item_done(); //just lets sequencer know driver is done
             
-
             //add blocking until scoreboard sees des_monitor is done
-            `uvm_info(get_type_name(), $sformatf("pre wait trigger"), UVM_LOW);
             des_done.wait_trigger;
-            `uvm_info(get_type_name(), $sformatf("wait trigger finished"), UVM_LOW);
-            des_done.reset;
-            
+            des_done.reset;  
             seq_item_port.put(rsp);
         end
     endtask: run_phase
@@ -54,16 +51,16 @@ class ser_driver extends uvm_driver #(ser_transaction);
          s_vif.dr_cb.in_data <= 8'b00000000;
          s_vif.dr_cb.in_RD <= 2'sb11;
          s_vif.dr_cb.rst_n <= 0;
-         //@(s_vif.dr_cb);
     endtask: reset
     
     virtual task drive();
-        @(s_vif.dr_cb);
         wait(!s_vif.reset);
-        @(s_vif.dr_cb);
+        //@(s_vif.dr_cb);
+ 
         s_vif.dr_cb.rst_n <= 1'b1;
         s_vif.dr_cb.in_data <= req.in_data;
         s_vif.dr_cb.in_RD <= req.in_RD;
+        `uvm_info(get_type_name(), "ser_driver INPUT SENT", UVM_LOW);
     endtask: drive
      
 endclass: ser_driver
