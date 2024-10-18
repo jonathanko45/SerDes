@@ -10,6 +10,7 @@ class des_monitor extends uvm_monitor;
     uvm_event des_done;
     
     bit [9:0] out_bits;
+    bit first_seq;
     
     `uvm_component_utils(des_monitor)
     
@@ -37,9 +38,13 @@ class des_monitor extends uvm_monitor;
     endtask : run_phase
      
     task monitor_bus();
+        if(s_vif.reset) first_seq <= 1;
         wait(!s_vif.reset);
- 
-        repeat (3)@(s_vif.rc_cb);
+        if(first_seq == 1) begin
+            first_seq <= 0;
+            @(s_vif.rc_cb);  
+        end
+        repeat (2)@(s_vif.rc_cb);
         @(s_vif.dr_cb);
         repeat(3) @(s_vif.rc_cb_fast);
         for(int i = 0; i < 10; i++) begin

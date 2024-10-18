@@ -32,11 +32,11 @@ class ser_driver extends uvm_driver #(ser_transaction);
             //`uvm_info(get_full_name(), $sformatf("TRANSACTION FROM DRIVER"), UVM_LOW);
             req.print();
             repeat (3) @(s_vif.dr_cb);
-            @(s_vif.rc_cb); //one of each so monitor syncs with ref model
-            `uvm_info(get_type_name(), "ser_driver sending clone to ref", UVM_LOW);
+            @(s_vif.rc_cb);
             $cast(rsp, req.clone()); //making clone of transaction to send to reference model
             rsp.set_id_info(req);
             drv2rm_port.write(rsp);
+            s_vif.dr_cb.rst_n <= 1'b0;
             seq_item_port.item_done(); //just lets sequencer know driver is done
             
             //add blocking until scoreboard sees des_monitor is done
@@ -55,12 +55,9 @@ class ser_driver extends uvm_driver #(ser_transaction);
     
     virtual task drive();
         wait(!s_vif.reset);
-        //@(s_vif.dr_cb);
- 
         s_vif.dr_cb.rst_n <= 1'b1;
         s_vif.dr_cb.in_data <= req.in_data;
         s_vif.dr_cb.in_RD <= req.in_RD;
-        `uvm_info(get_type_name(), "ser_driver INPUT SENT", UVM_LOW);
     endtask: drive
      
 endclass: ser_driver

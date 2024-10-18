@@ -13,7 +13,7 @@ class ser_agent extends uvm_agent;
         super.new(name, parent);
      endfunction: new
      
-     function void build_phase(uvm_phase phase); //creates sequencer,driver, and monitor
+     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
         s_sequencer = ser_sequencer::type_id::create("s_sequencer", this);
         s_driver = ser_driver::type_id::create("s_driver", this);

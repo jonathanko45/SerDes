@@ -7,7 +7,7 @@ interface deserializer_if
      input reset);
      
     logic in_data;
-    logic rst_n; //maybe can merge with another reset
+    logic rst_n;
     logic [7:0] out_8b;
     
     logic wrst_n, w_en;
@@ -38,7 +38,7 @@ interface deserializer_if
     clocking rc_cb@(negedge clk);
         input in_data;
         input rst_n;
-        input out_8b; //might be the only value needed
+        input out_8b;
         input wrst_n;
         input w_en;
         input rrst_n;

@@ -5,8 +5,8 @@ class des_slave_sequence extends uvm_sequence #(des_transaction);
     `uvm_object_utils(des_slave_sequence)
     `uvm_declare_p_sequencer(des_sequencer)
    
-    des_transaction slave_req;  //my_slave_seq_item m_item;
-    ser_transaction mon_trans;  //my_transaction m_request; <- transaction from DUT
+    des_transaction slave_req;
+    ser_transaction mon_trans;
     
     function new(string name = "des_slave_sequence");
         super.new(name);

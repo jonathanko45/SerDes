@@ -29,8 +29,6 @@ module serializer
       r_4B <= 0;
       r_6B <= 0;
       r_10B <= 0;
-      r_RD <= 2'sb11; //RD = -1
-      r_RD_init <= 2'sb11;
       r_Data_Stage <= 3'b000;
     end else begin 
       if (r_Data_Stage == 3'b000) begin
@@ -184,7 +182,6 @@ module serializer
     end
   end
   
-  //should be combinational block
   always @(r_Data_Stage) begin
     if (r_Data_Stage == 3'b001) begin
         if ($countones(r_6B) > 3)
@@ -215,7 +212,7 @@ module serializer
         if (r_Data_Stage == 3'b011) begin
           if (r_Counter == 11) begin //10 bits now + 2 cycles to make it through shift register
             r_Counter <= 0; 
-            r_Data_Stage <= 3'b000;
+            r_Data_Stage <= 3'b100;
           end else begin
             if (r_Counter <= 9)  //so we dont access beyond array length
                 r1_Data <= r_10B[r_Counter]; //slow data in, LSB first

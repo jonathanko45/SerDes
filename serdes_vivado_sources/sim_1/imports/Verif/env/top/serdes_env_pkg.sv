@@ -11,7 +11,7 @@ package serdes_env_pkg;
 
    // include top env files 
   `include "serdes_coverage.sv"
-  `include "ser_scoreboard.sv"
+  `include "serdes_scoreboard.sv"
   `include "serdes_env.sv"
     
 endpackage

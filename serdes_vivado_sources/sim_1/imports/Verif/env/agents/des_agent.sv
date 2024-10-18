@@ -13,7 +13,7 @@ class des_agent extends uvm_agent;
         super.new(name, parent);
      endfunction: new
      
-     function void build_phase(uvm_phase phase); //creates sequencer,driver, and monitor
+     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
         d_sequencer = des_sequencer::type_id::create("d_sequencer", this);
         d_driver = des_driver::type_id::create("d_driver", this);
@@ -23,7 +23,7 @@ class des_agent extends uvm_agent;
      
      function void connect_phase(uvm_phase phase);
         d_driver.seq_item_port.connect(d_sequencer.seq_item_export);
-        d_monitor.mon2seq_port.connect(d_sequencer.d_seq_export); //monitor to sequencer
+        d_monitor.mon2seq_port.connect(d_sequencer.d_seq_export);
         `uvm_info(get_full_name(), "Connect Stage Complete", UVM_LOW)
      endfunction: connect_phase
      
