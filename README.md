@@ -11,7 +11,8 @@ A UVM testbench verifies the design by making use of constrained random stimulus
 * The serialized output is captured by a reactive slave agent, which creates a new transaction for the deserializer. A passive agent then collects the deserializer's output and compares it in the scoreboard with the original random packet, confirming data integrity
 
 ## UVM Block Diagram
-![SerDes block diagram](https://github.com/user-attachments/assets/517da1f5-93f8-4b1d-a5da-4eb21c14e3b1)
+![SerDes block diagram](https://github.com/user-attachments/assets/ee67f8d7-58f2-4142-95eb-ad2b3a389ddd)
+
 
 ## Getting Started
 ### Dependencies
