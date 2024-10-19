@@ -1,25 +1,24 @@
-`ifndef SER_COVERAGE
-`define SER_COVERAGE
+`ifndef SERDES_COVERAGE
+`define SERDES_COVERAGE
 
-class ser_coverage extends uvm_subscriber #(ser_transaction);
+class serdes_coverage extends uvm_subscriber #(ser_transaction);
     ser_transaction cov_trans;
     int count;
     
-    `uvm_component_utils(ser_coverage)
+    `uvm_component_utils(serdes_coverage)
     
     covergroup cg;
         option.per_instance = 1;
         option.goal = 100;
 
         cov_in_data:    coverpoint cov_trans.in_data {bins in_values[] = {[0:$]};}
-        cov_out_data:   coverpoint cov_trans.out_data {bins out_values[] = {[0:$]};} //might not want every single out value
         cov_out_10b:    coverpoint cov_trans.out_10b {bins out_10b_1 = {1}; bins out_10b_0  = {0};}
      endgroup: cg
      
      function new(string name, uvm_component parent);
         super.new(name, parent);
         cg = new();
-        cov_trans =new();
+        cov_trans = new();
      endfunction: new
      
      function void write (ser_transaction t);
@@ -33,6 +32,6 @@ class ser_coverage extends uvm_subscriber #(ser_transaction);
         `uvm_info(get_type_name(), $sformatf("Current coverage = %0f", cg.get_coverage()), UVM_LOW)
      endfunction: extract_phase
      
- endclass: ser_coverage
+ endclass: serdes_coverage
  
 `endif
