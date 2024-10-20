@@ -12,7 +12,7 @@ class serdes_coverage extends uvm_subscriber #(ser_transaction);
         option.goal = 100;
 
         cov_in_data:    coverpoint cov_trans.in_data {bins in_values[] = {[0:$]};}
-        cov_out_10b:    coverpoint cov_trans.out_10b {bins out_10b_1 = {1}; bins out_10b_0  = {0};}
+        cov_out_10b:    coverpoint cov_trans.out_10b {bins out_values[] = {[0:$]};}
      endgroup: cg
      
      function new(string name, uvm_component parent);
