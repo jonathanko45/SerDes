@@ -1,7 +1,7 @@
 # Project Overview
 This project is a SerDes (serializer/deserializer) designed using 8b/10b encoding and verified with a full UVM testbench
 ### Design
-* The SerDes blocks operate at 20 MHz and transmit over a “channel” at a speed of 1 GHz. The design does not actually send data over a high-speed channel and thus speed is kept low for the sake of simulation
+* The SerDes blocks operate at 20 MHz and transmit symbols over a “channel” at a rate of 1 GHz (data rate of 800 MHz). The design does not actually send data over a high-speed channel and thus speed is kept low for the sake of simulation
 * An asynchronous FIFO is used at the input of the deserializer to manage crossing clock domains
 * The serializer simply uses a 2 flip-flop synchronizer when sending serialized across clock domain
 
